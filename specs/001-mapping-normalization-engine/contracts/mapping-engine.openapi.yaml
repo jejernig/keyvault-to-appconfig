@@ -1,0 +1,261 @@
+openapi: 3.0.3
+info:
+  title: Mapping and Normalization Engine API
+  version: 1.0.0
+  description: API contract for managing mapping specs and executing mapping runs.
+servers:
+  - url: https://example.local
+paths:
+  /mapping-specs:
+    post:
+      summary: Create a mapping specification
+      operationId: createMappingSpec
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MappingSpecification'
+      responses:
+        '201':
+          description: Mapping specification created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MappingSpecification'
+        '400':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+  /mapping-specs/validate:
+    post:
+      summary: Validate a mapping specification
+      operationId: validateMappingSpec
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MappingSpecification'
+      responses:
+        '200':
+          description: Validation result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationResult'
+        '400':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+  /mapping-specs/{specId}:
+    get:
+      summary: Get a mapping specification
+      operationId: getMappingSpec
+      parameters:
+        - name: specId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Mapping specification
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MappingSpecification'
+        '404':
+          description: Not found
+  /mapping-runs:
+    post:
+      summary: Execute a mapping run
+      operationId: createMappingRun
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MappingRunRequest'
+      responses:
+        '201':
+          description: Mapping run created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MappingRun'
+        '400':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+  /mapping-runs/{runId}:
+    get:
+      summary: Get a mapping run and collision report
+      operationId: getMappingRun
+      parameters:
+        - name: runId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Mapping run detail
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MappingRunDetail'
+        '404':
+          description: Not found
+components:
+  schemas:
+    MappingSpecification:
+      type: object
+      required:
+        - specificationId
+        - name
+        - version
+        - rules
+      properties:
+        specificationId:
+          type: string
+        name:
+          type: string
+        version:
+          type: string
+        description:
+          type: string
+        defaultBehavior:
+          type: string
+          enum: [reject, pass-through]
+        collisionPolicy:
+          type: string
+          enum: [error, keep-first, keep-last, report-only]
+        rules:
+          type: array
+          items:
+            $ref: '#/components/schemas/MappingRule'
+    MappingRule:
+      type: object
+      required:
+        - ruleId
+        - strategyType
+        - sourceSelector
+        - targetKey
+        - priority
+      properties:
+        ruleId:
+          type: string
+        strategyType:
+          type: string
+          enum: [direct, regex]
+        sourceSelector:
+          type: string
+        targetKey:
+          type: string
+        priority:
+          type: integer
+        transforms:
+          type: array
+          items:
+            $ref: '#/components/schemas/TransformOperation'
+    TransformOperation:
+      type: object
+      required:
+        - transformType
+      properties:
+        transformType:
+          type: string
+          enum: [trim, upper, lower, prefix, suffix, replace, regex-replace, capture-substitute]
+        parameters:
+          type: object
+          additionalProperties: true
+        order:
+          type: integer
+    MappingRunRequest:
+      type: object
+      required:
+        - specificationId
+        - sourceSetId
+      properties:
+        specificationId:
+          type: string
+        sourceSetId:
+          type: string
+    MappingRun:
+      type: object
+      required:
+        - runId
+        - specificationId
+        - status
+      properties:
+        runId:
+          type: string
+        specificationId:
+          type: string
+        status:
+          type: string
+          enum: [succeeded, failed]
+        collisionReportId:
+          type: string
+    MappingRunDetail:
+      allOf:
+        - $ref: '#/components/schemas/MappingRun'
+        - type: object
+          properties:
+            collisionReport:
+              $ref: '#/components/schemas/CollisionReport'
+    CollisionReport:
+      type: object
+      required:
+        - reportId
+        - entries
+      properties:
+        reportId:
+          type: string
+        entries:
+          type: array
+          items:
+            $ref: '#/components/schemas/CollisionEntry'
+    CollisionEntry:
+      type: object
+      required:
+        - normalizedKey
+        - sourceKeys
+        - appliedPolicy
+      properties:
+        normalizedKey:
+          type: string
+        sourceKeys:
+          type: array
+          items:
+            type: string
+        appliedPolicy:
+          type: string
+          enum: [error, keep-first, keep-last, report-only]
+    ValidationResult:
+      type: object
+      required:
+        - isValid
+      properties:
+        isValid:
+          type: boolean
+        errors:
+          type: array
+          items:
+            $ref: '#/components/schemas/ValidationError'
+    ValidationError:
+      type: object
+      required:
+        - message
+      properties:
+        message:
+          type: string
+        field:
+          type: string

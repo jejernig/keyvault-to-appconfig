@@ -1,0 +1,52 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.local/mapping-spec.schema.json",
+  "title": "MappingSpecification",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["name", "version", "rules"],
+  "properties": {
+    "specificationId": { "type": "string" },
+    "name": { "type": "string" },
+    "version": { "type": "string" },
+    "description": { "type": "string" },
+    "defaultBehavior": { "type": "string", "enum": ["reject-unmapped", "pass-through"] },
+    "collisionPolicy": { "type": "string", "enum": ["error", "keep-first", "keep-last", "report-only"] },
+    "createdAt": { "type": "string" },
+    "createdBy": { "type": "string" },
+    "rules": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/rule" }
+    }
+  },
+  "$defs": {
+    "rule": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["ruleId", "strategyType", "sourceSelector", "targetKey", "priority"],
+      "properties": {
+        "ruleId": { "type": "string" },
+        "strategyType": { "type": "string", "enum": ["direct", "regex"] },
+        "sourceSelector": { "type": "string" },
+        "targetKey": { "type": "string" },
+        "priority": { "type": "integer", "minimum": 0, "maximum": 1000 },
+        "transforms": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/transform" }
+        }
+      }
+    },
+    "transform": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["transformType"],
+      "properties": {
+        "transformType": {
+          "type": "string",
+          "enum": ["trim", "upper", "lower", "prefix", "suffix", "replace", "regex-replace", "capture-substitute"]
+        },
+        "parameters": { "type": "object" }
+      }
+    }
+  }
+}

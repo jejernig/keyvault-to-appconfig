@@ -2,6 +2,9 @@
 bin/
 obj/
 
+# Mapping spec storage
+.mapping-specs/
+
 # User-specific files
 *.user
 *.suo
@@ -16,3 +19,4 @@ Thumbs.db
 *.swp
 .vscode/
 .idea/
+.vs/

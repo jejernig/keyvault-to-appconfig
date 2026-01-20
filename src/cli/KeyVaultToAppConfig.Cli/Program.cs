@@ -1,5 +1,5 @@
 using System.CommandLine;
-using System.CommandLine.Invocation;
+using KeyVaultToAppConfig.Cli.Commands;
 using KeyVaultToAppConfig.Core;
 using KeyVaultToAppConfig.Services;
 
@@ -9,12 +9,12 @@ public static class Program
 {
     public static async Task<int> Main(string[] args)
     {
-        var keyvaultUriOption = new Option<string>("--keyvault-uri") { IsRequired = true };
-        var appconfigEndpointOption = new Option<string>("--appconfig-endpoint") { IsRequired = true };
+        var keyvaultUriOption = new Option<string>("--keyvault-uri") { Required = true };
+        var appconfigEndpointOption = new Option<string>("--appconfig-endpoint") { Required = true };
         var dryRunOption = new Option<bool>("--dry-run");
         var diffOption = new Option<bool>("--diff");
         var applyOption = new Option<bool>("--apply");
-        var modeOption = new Option<string>("--mode", () => "kvref");
+        var modeOption = new Option<string>("--mode") { DefaultValueFactory = _ => "kvref" };
         var confirmCopyValueOption = new Option<bool>("--confirm-copy-value");
         var environmentOption = new Option<string?>("--environment");
         var mappingFileOption = new Option<string?>("--mapping-file");
@@ -23,66 +23,67 @@ public static class Program
         var excludeRegexOption = new Option<string?>("--exclude-regex");
         var onlyTagOption = new Option<string?>("--only-tag");
         var enabledOnlyOption = new Option<bool>("--enabled-only");
-        var versionModeOption = new Option<string?>("--version-mode", () => "latest");
+        var versionModeOption = new Option<string?>("--version-mode") { DefaultValueFactory = _ => "latest" };
         var versionMapOption = new Option<string?>("--version-map");
         var pageSizeOption = new Option<int?>("--page-size");
         var continuationTokenOption = new Option<string?>("--continuation-token");
         var reportJsonOption = new Option<string?>("--report-json");
 
-        var rootCommand = new RootCommand("Key Vault to App Configuration standardizer")
-        {
-            keyvaultUriOption,
-            appconfigEndpointOption,
-            dryRunOption,
-            diffOption,
-            applyOption,
-            modeOption,
-            confirmCopyValueOption,
-            environmentOption,
-            mappingFileOption,
-            parallelismOption,
-            includePrefixOption,
-            excludeRegexOption,
-            onlyTagOption,
-            enabledOnlyOption,
-            versionModeOption,
-            versionMapOption,
-            pageSizeOption,
-            continuationTokenOption,
-            reportJsonOption
-        };
+        var rootCommand = new RootCommand("Key Vault to App Configuration standardizer");
+        rootCommand.Add(keyvaultUriOption);
+        rootCommand.Add(appconfigEndpointOption);
+        rootCommand.Add(dryRunOption);
+        rootCommand.Add(diffOption);
+        rootCommand.Add(applyOption);
+        rootCommand.Add(modeOption);
+        rootCommand.Add(confirmCopyValueOption);
+        rootCommand.Add(environmentOption);
+        rootCommand.Add(mappingFileOption);
+        rootCommand.Add(parallelismOption);
+        rootCommand.Add(includePrefixOption);
+        rootCommand.Add(excludeRegexOption);
+        rootCommand.Add(onlyTagOption);
+        rootCommand.Add(enabledOnlyOption);
+        rootCommand.Add(versionModeOption);
+        rootCommand.Add(versionMapOption);
+        rootCommand.Add(pageSizeOption);
+        rootCommand.Add(continuationTokenOption);
+        rootCommand.Add(reportJsonOption);
 
-        rootCommand.SetHandler(async context =>
+        rootCommand.Add(MappingSpecCommand.Build());
+        rootCommand.Add(MappingValidateCommand.Build());
+        rootCommand.Add(MappingRunCommand.Build());
+
+        rootCommand.SetAction(async (parseResult, cancellationToken) =>
         {
-            var parse = context.ParseResult;
             var options = new CliOptions
             {
-                KeyVaultUri = parse.GetValueForOption(keyvaultUriOption),
-                AppConfigEndpoint = parse.GetValueForOption(appconfigEndpointOption),
-                DryRun = parse.GetValueForOption(dryRunOption),
-                Diff = parse.GetValueForOption(diffOption),
-                Apply = parse.GetValueForOption(applyOption),
-                Mode = parse.GetValueForOption(modeOption) ?? "kvref",
-                ConfirmCopyValue = parse.GetValueForOption(confirmCopyValueOption),
-                Environment = parse.GetValueForOption(environmentOption),
-                MappingFile = parse.GetValueForOption(mappingFileOption),
-                Parallelism = parse.GetValueForOption(parallelismOption),
-                IncludePrefix = parse.GetValueForOption(includePrefixOption),
-                ExcludeRegex = parse.GetValueForOption(excludeRegexOption),
-                OnlyTag = parse.GetValueForOption(onlyTagOption),
-                EnabledOnly = parse.GetValueForOption(enabledOnlyOption),
-                VersionMode = parse.GetValueForOption(versionModeOption),
-                VersionMapPath = parse.GetValueForOption(versionMapOption),
-                PageSize = parse.GetValueForOption(pageSizeOption),
-                ContinuationToken = parse.GetValueForOption(continuationTokenOption),
-                ReportJson = parse.GetValueForOption(reportJsonOption)
+                KeyVaultUri = parseResult.GetRequiredValue(keyvaultUriOption),
+                AppConfigEndpoint = parseResult.GetRequiredValue(appconfigEndpointOption),
+                DryRun = parseResult.GetValue(dryRunOption),
+                Diff = parseResult.GetValue(diffOption),
+                Apply = parseResult.GetValue(applyOption),
+                Mode = parseResult.GetValue(modeOption) ?? "kvref",
+                ConfirmCopyValue = parseResult.GetValue(confirmCopyValueOption),
+                Environment = parseResult.GetValue(environmentOption),
+                MappingFile = parseResult.GetValue(mappingFileOption),
+                Parallelism = parseResult.GetValue(parallelismOption),
+                IncludePrefix = parseResult.GetValue(includePrefixOption),
+                ExcludeRegex = parseResult.GetValue(excludeRegexOption),
+                OnlyTag = parseResult.GetValue(onlyTagOption),
+                EnabledOnly = parseResult.GetValue(enabledOnlyOption),
+                VersionMode = parseResult.GetValue(versionModeOption),
+                VersionMapPath = parseResult.GetValue(versionMapOption),
+                PageSize = parseResult.GetValue(pageSizeOption),
+                ContinuationToken = parseResult.GetValue(continuationTokenOption),
+                ReportJson = parseResult.GetValue(reportJsonOption)
             };
 
-            var exitCode = await RunAsync(options, context.GetCancellationToken());
-            context.ExitCode = exitCode;
+            return await RunAsync(options, cancellationToken);
         });
 
-        return await rootCommand.InvokeAsync(args);
+        var parseResult = rootCommand.Parse(args);
+        return await parseResult.InvokeAsync();
     }
 
     private static async Task<int> RunAsync(CliOptions options, CancellationToken cancellationToken)

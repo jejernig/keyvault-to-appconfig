@@ -4,6 +4,10 @@
     <ProjectReference Include="..\..\lib\KeyVaultToAppConfig.Core\KeyVaultToAppConfig.Core.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include="Azure.Identity" Version="*" />
+  </ItemGroup>
+
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>

@@ -1,3 +1,5 @@
+using KeyVaultToAppConfig.Core.Enumeration;
+
 namespace KeyVaultToAppConfig.Core;
 
 public sealed class RunReport
@@ -8,6 +10,7 @@ public sealed class RunReport
     public Totals Totals { get; set; } = new();
     public List<ChangeSummary> Changes { get; set; } = new();
     public List<FailureSummary> Failures { get; set; } = new();
+    public List<SecretDescriptor> EnumeratedSecrets { get; set; } = new();
 }
 
 public sealed class Totals

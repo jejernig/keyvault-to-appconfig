@@ -55,6 +55,30 @@ public sealed class RunConfigurationValidator
             }
         }
 
+        if (!string.IsNullOrWhiteSpace(options.VersionMode)
+            && !string.Equals(options.VersionMode, "latest", StringComparison.OrdinalIgnoreCase)
+            && !string.Equals(options.VersionMode, "explicit", StringComparison.OrdinalIgnoreCase))
+        {
+            result.Errors.Add("--version-mode must be either latest or explicit.");
+        }
+
+        if (string.Equals(options.VersionMode, "explicit", StringComparison.OrdinalIgnoreCase))
+        {
+            if (string.IsNullOrWhiteSpace(options.VersionMapPath))
+            {
+                result.Errors.Add("--version-mode explicit requires --version-map.");
+            }
+            else if (!File.Exists(options.VersionMapPath))
+            {
+                result.Errors.Add("--version-map must point to an existing file.");
+            }
+        }
+
+        if (options.PageSize is not null && options.PageSize < 1)
+        {
+            result.Errors.Add("--page-size must be >= 1 when provided.");
+        }
+
         if (!string.IsNullOrWhiteSpace(options.OnlyTag)
             && !options.OnlyTag.Contains('=', StringComparison.Ordinal))
         {
@@ -77,6 +101,11 @@ public sealed class RunConfigurationValidator
             IncludePrefix = options.IncludePrefix,
             ExcludeRegex = options.ExcludeRegex,
             OnlyTag = options.OnlyTag,
+            EnabledOnly = options.EnabledOnly,
+            VersionMode = options.VersionMode ?? "latest",
+            VersionMapPath = options.VersionMapPath,
+            PageSize = options.PageSize,
+            ContinuationToken = options.ContinuationToken,
             ReportJson = options.ReportJson,
             Mode = options.Mode,
             ConfirmCopyValue = options.ConfirmCopyValue

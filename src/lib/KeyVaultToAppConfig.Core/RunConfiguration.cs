@@ -11,6 +11,11 @@ public sealed class RunConfiguration
     public string? IncludePrefix { get; init; }
     public string? ExcludeRegex { get; init; }
     public string? OnlyTag { get; init; }
+    public bool EnabledOnly { get; init; }
+    public string VersionMode { get; init; } = "latest";
+    public string? VersionMapPath { get; init; }
+    public int? PageSize { get; init; }
+    public string? ContinuationToken { get; init; }
     public string? ReportJson { get; init; }
     public string Mode { get; init; } = "kvref";
     public bool ConfirmCopyValue { get; init; }

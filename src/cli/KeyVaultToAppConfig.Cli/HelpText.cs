@@ -23,6 +23,11 @@ Options:
   --include-prefix <prefix>
   --exclude-regex <pattern>
   --only-tag <key=value>
+  --enabled-only
+  --version-mode <latest|explicit> (default: latest)
+  --version-map <path>
+  --page-size <n>
+  --continuation-token <token>
   --report-json <path>
 """;
 }

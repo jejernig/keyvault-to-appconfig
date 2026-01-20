@@ -1,0 +1,17 @@
+namespace KeyVaultToAppConfig.Core;
+
+public sealed class RunConfiguration
+{
+    public required string KeyVaultUri { get; init; }
+    public required string AppConfigEndpoint { get; init; }
+    public required ExecutionMode ExecutionMode { get; init; }
+    public string Environment { get; init; } = string.Empty;
+    public string? MappingFile { get; init; }
+    public int Parallelism { get; init; } = 1;
+    public string? IncludePrefix { get; init; }
+    public string? ExcludeRegex { get; init; }
+    public string? OnlyTag { get; init; }
+    public string? ReportJson { get; init; }
+    public string Mode { get; init; } = "kvref";
+    public bool ConfirmCopyValue { get; init; }
+}

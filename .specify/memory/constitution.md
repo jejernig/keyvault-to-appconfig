@@ -1,50 +1,68 @@
-# [PROJECT_NAME] Constitution
-<!-- Example: Spec Constitution, TaskFlow Constitution, etc. -->
+<!--
+Sync Impact Report
+- Version change: N/A -> 1.0.0
+- Modified principles: None (initial adoption)
+- Added sections: Core Principles; Security and Compliance Requirements; Development Workflow and Quality Gates; Governance
+- Removed sections: None
+- Templates requiring updates: ? updated - .specify/templates/plan-template.md; ? updated - .specify/templates/tasks-template.md; ? verified - .specify/templates/spec-template.md
+- Follow-up TODOs: TODO(RATIFICATION_DATE): original adoption date not found in repository
+-->
+# Key Vault to App Configuration Standardizer Constitution
 
 ## Core Principles
 
-### [PRINCIPLE_1_NAME]
-<!-- Example: I. Library-First -->
-[PRINCIPLE_1_DESCRIPTION]
-<!-- Example: Every feature starts as a standalone library; Libraries must be self-contained, independently testable, documented; Clear purpose required - no organizational-only libraries -->
+### I. Secret Safety and Least Privilege
+- Secret values MUST never be logged, printed, or written to reports.
+- Copy-value mode MUST require an explicit flag and a secondary confirmation input.
+- Access scopes MUST be least-privilege for both Key Vault and App Configuration.
+Rationale: Prevents accidental leakage and reduces blast radius.
 
-### [PRINCIPLE_2_NAME]
-<!-- Example: II. CLI Interface -->
-[PRINCIPLE_2_DESCRIPTION]
-<!-- Example: Every library exposes functionality via CLI; Text in/out protocol: stdin/args → stdout, errors → stderr; Support JSON + human-readable formats -->
+### II. Deterministic, Idempotent Runs
+- Given the same inputs, runs MUST be deterministic and order-stable.
+- Dry-run and diff modes MUST perform zero writes.
+- Apply mode MUST be idempotent and update only when changes are detected.
+Rationale: Enables safe automation and predictable CI/CD behavior.
 
-### [PRINCIPLE_3_NAME]
-<!-- Example: III. Test-First (NON-NEGOTIABLE) -->
-[PRINCIPLE_3_DESCRIPTION]
-<!-- Example: TDD mandatory: Tests written → User approved → Tests fail → Then implement; Red-Green-Refactor cycle strictly enforced -->
+### III. Explicit Mapping and Naming Standards
+- Mapping files are the source of truth; convention fallbacks MUST be explicit.
+- Keys MUST follow the agreed standard format; labels carry environment context.
+- Mapping rules MUST be validated with clear, actionable errors.
+Rationale: Consistent keys reduce drift and simplify operations.
 
-### [PRINCIPLE_4_NAME]
-<!-- Example: IV. Integration Testing -->
-[PRINCIPLE_4_DESCRIPTION]
-<!-- Example: Focus areas requiring integration tests: New library contract tests, Contract changes, Inter-service communication, Shared schemas -->
+### IV. Audit-Ready Observability
+- Logs MUST support structured output and correlation identifiers.
+- Reports MUST include counts, changes, skips, and failures without secret data.
+- Exit codes MUST follow the documented contract.
+Rationale: Enables auditability and operational accountability.
 
-### [PRINCIPLE_5_NAME]
-<!-- Example: V. Observability, VI. Versioning & Breaking Changes, VII. Simplicity -->
-[PRINCIPLE_5_DESCRIPTION]
-<!-- Example: Text I/O ensures debuggability; Structured logging required; Or: MAJOR.MINOR.BUILD format; Or: Start simple, YAGNI principles -->
+### V. Resilient Failure Handling
+- Failures MUST be isolated per secret unless fail-fast is enabled.
+- Retries MUST use Azure SDK policies with backoff and respect cancellation.
+- Partial failures MUST be surfaced with a non-zero exit code.
+Rationale: Maximizes progress while keeping failures visible.
 
-## [SECTION_2_NAME]
-<!-- Example: Additional Constraints, Security Requirements, Performance Standards, etc. -->
+## Security and Compliance Requirements
 
-[SECTION_2_CONTENT]
-<!-- Example: Technology stack requirements, compliance standards, deployment policies, etc. -->
+- Use DefaultAzureCredential with managed identity and workload identity support.
+- Document required RBAC roles for Key Vault and App Configuration access.
+- Support private endpoints and avoid hard-coded endpoints or secrets.
+- Redaction rules MUST cover secret names when enabled by configuration.
+- Key/value tags MUST mark managed entries with source and timestamp metadata.
 
-## [SECTION_3_NAME]
-<!-- Example: Development Workflow, Review Process, Quality Gates, etc. -->
+## Development Workflow and Quality Gates
 
-[SECTION_3_CONTENT]
-<!-- Example: Code review requirements, testing gates, deployment approval process, etc. -->
+- Unit tests MUST cover mapping, diff logic, and redaction safeguards.
+- Integration tests MUST validate Key Vault references and App Config writes
+  before release.
+- PRs MUST include a Constitution Check summary and any deviations.
+- Release artifacts MUST be reproducible with documented build steps.
 
 ## Governance
-<!-- Example: Constitution supersedes all other practices; Amendments require documentation, approval, migration plan -->
 
-[GOVERNANCE_RULES]
-<!-- Example: All PRs/reviews must verify compliance; Complexity must be justified; Use [GUIDANCE_FILE] for runtime development guidance -->
+- This constitution supersedes all other project guidance and templates.
+- Amendments require a documented rationale, impact notes, and reviewer approval.
+- Versioning follows semantic rules: MAJOR for breaking governance, MINOR for
+  new principles or material expansions, PATCH for clarifications.
+- Compliance is reviewed in PRs; deviations require a documented waiver.
 
-**Version**: [CONSTITUTION_VERSION] | **Ratified**: [RATIFICATION_DATE] | **Last Amended**: [LAST_AMENDED_DATE]
-<!-- Example: Version: 2.1.1 | Ratified: 2025-06-13 | Last Amended: 2025-07-16 -->
+**Version**: 1.0.0 | **Ratified**: TODO(RATIFICATION_DATE): original adoption date not found in repository | **Last Amended**: 2026-01-20

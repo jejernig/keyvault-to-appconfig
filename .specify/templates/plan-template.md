@@ -31,7 +31,11 @@
 
 *GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
 
-[Gates determined based on constitution file]
+- No secret values logged or stored in reports; redaction rules applied.
+- Dry-run and diff confirm zero writes and deterministic ordering.
+- Mapping rules and naming standard documented and validated.
+- Tests planned for mapping, diff logic, and redaction safeguards.
+- Audit outputs and exit codes match documented contract.
 
 ## Project Structure
 

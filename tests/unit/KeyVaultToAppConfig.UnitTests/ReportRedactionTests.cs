@@ -52,4 +52,13 @@ public sealed class ReportRedactionTests
             }
         }
     }
+
+    [Fact]
+    public void Redaction_RemovesSecretMarkers()
+    {
+        var redacted = Redaction.Redact("clientsecret=supersecret");
+
+        Assert.DoesNotContain("supersecret", redacted, StringComparison.Ordinal);
+        Assert.Contains("[REDACTED]", redacted, StringComparison.Ordinal);
+    }
 }

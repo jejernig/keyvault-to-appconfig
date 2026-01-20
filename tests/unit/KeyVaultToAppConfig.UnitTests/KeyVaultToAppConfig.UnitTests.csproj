@@ -21,6 +21,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\..\src\lib\KeyVaultToAppConfig.Core\KeyVaultToAppConfig.Core.csproj" />
     <ProjectReference Include="..\..\..\src\cli\KeyVaultToAppConfig.Cli\KeyVaultToAppConfig.Cli.csproj" />
+    <ProjectReference Include="..\..\..\src\services\KeyVaultToAppConfig.Services\KeyVaultToAppConfig.Services.csproj" />
   </ItemGroup>
 
 </Project>

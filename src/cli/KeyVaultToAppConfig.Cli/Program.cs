@@ -107,6 +107,7 @@ public static class Program
 
         report.Changes = DeterministicOrdering.OrderChanges(report.Changes).ToList();
         output.WriteRunSummary(report);
+        output.WriteFailures(report.Failures);
 
         if (config.ExecutionMode is ExecutionMode.Diff or ExecutionMode.DryRun)
         {

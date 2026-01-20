@@ -26,6 +26,14 @@ public sealed class OutputWriter
         Console.WriteLine($"Failed: {report.Totals.Failed}");
     }
 
+    public void WriteFailures(IEnumerable<FailureSummary> failures)
+    {
+        foreach (var failure in failures)
+        {
+            Console.Error.WriteLine($"{failure.ErrorType}: {failure.Key} - {Redaction.Redact(failure.Message)}");
+        }
+    }
+
     public void WriteDiff(IEnumerable<ChangeSummary> changes)
     {
         foreach (var change in changes)

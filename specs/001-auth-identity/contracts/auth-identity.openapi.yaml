@@ -1,0 +1,87 @@
+openapi: 3.0.3
+info:
+  title: Authentication and Identity Contract
+  version: 1.0.0
+  description: >-
+    Conceptual contract describing authentication resolution and error handling
+    for managed identity, workload identity, and local developer credentials.
+servers:
+  - url: https://localhost
+paths:
+  /auth/resolve:
+    post:
+      summary: Resolve credential source and acquire token
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AuthRequest'
+      responses:
+        '200':
+          description: Authentication resolved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResult'
+        '400':
+          description: Invalid request or unsupported identity type
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: No valid credential source
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: RBAC denied
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Fatal authentication error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+components:
+  schemas:
+    AuthRequest:
+      type: object
+      properties:
+        allowedSources:
+          type: array
+          items:
+            type: string
+            enum: [managed-identity, workload-identity, local-dev]
+        retryLimit:
+          type: integer
+          minimum: 0
+        requireNoSecrets:
+          type: boolean
+    AuthResult:
+      type: object
+      properties:
+        isSuccess:
+          type: boolean
+        selectedSource:
+          type: string
+          enum: [managed-identity, workload-identity, local-dev]
+        errorCategory:
+          type: string
+          enum: [none, transient, fatal, rbac]
+        errorMessage:
+          type: string
+        retryCount:
+          type: integer
+    ErrorResponse:
+      type: object
+      properties:
+        code:
+          type: string
+        message:
+          type: string

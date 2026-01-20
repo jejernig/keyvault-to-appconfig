@@ -1,5 +1,8 @@
+using Azure.Identity;
+using Azure.Security.KeyVault.Secrets;
 using KeyVaultToAppConfig.Core;
 using KeyVaultToAppConfig.Core.Auth;
+using KeyVaultToAppConfig.Core.Enumeration;
 
 namespace KeyVaultToAppConfig.Services;
 
@@ -65,20 +68,50 @@ public sealed class ExecutionService
             };
         }
 
-        var report = new RunReport
+        try
         {
-            RunId = Guid.NewGuid().ToString("N"),
-            ExecutionMode = config.ExecutionMode,
-            Timestamp = DateTimeOffset.UtcNow,
-            Totals = new Totals()
-        };
+            var credential = new DefaultAzureCredential();
+            var secretClient = new SecretClient(new Uri(config.KeyVaultUri), credential);
+            var enumerator = new KeyVaultSecretEnumerator(secretClient);
+            var filter = EnumerationFilterBuilder.Build(config);
+            var versionSelection = VersionSelectionBuilder.Build(config);
+            var secrets = await enumerator.EnumerateAsync(
+                filter,
+                versionSelection,
+                config.PageSize,
+                config.ContinuationToken,
+                cancellationToken);
 
-        if (config.ExecutionMode == ExecutionMode.Apply)
-        {
-            // Apply path placeholder; real implementation will populate changes and failures.
-            report.Totals.Scanned = 0;
+            return new RunReport
+            {
+                RunId = Guid.NewGuid().ToString("N"),
+                ExecutionMode = config.ExecutionMode,
+                Timestamp = DateTimeOffset.UtcNow,
+                Totals = new Totals
+                {
+                    Scanned = secrets.Count
+                },
+                EnumeratedSecrets = secrets.ToList()
+            };
         }
-
-        return report;
+        catch (Exception ex)
+        {
+            return new RunReport
+            {
+                RunId = Guid.NewGuid().ToString("N"),
+                ExecutionMode = config.ExecutionMode,
+                Timestamp = DateTimeOffset.UtcNow,
+                Totals = new Totals { Failed = 1 },
+                Failures =
+                {
+                    new FailureSummary
+                    {
+                        Key = "enumeration",
+                        ErrorType = "fatal",
+                        Message = ex.Message
+                    }
+                }
+            };
+        }
     }
 }

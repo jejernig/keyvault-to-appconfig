@@ -15,5 +15,10 @@ public sealed class CliOptions
     public string? IncludePrefix { get; set; }
     public string? ExcludeRegex { get; set; }
     public string? OnlyTag { get; set; }
+    public bool EnabledOnly { get; set; }
+    public string? VersionMode { get; set; }
+    public string? VersionMapPath { get; set; }
+    public int? PageSize { get; set; }
+    public string? ContinuationToken { get; set; }
     public string? ReportJson { get; set; }
 }

@@ -1,4 +1,5 @@
 using KeyVaultToAppConfig.Core;
+using KeyVaultToAppConfig.Core.Enumeration;
 
 namespace KeyVaultToAppConfig.Cli;
 
@@ -34,6 +35,18 @@ public sealed class OutputWriter
         }
     }
 
+    public void WriteEnumeration(IEnumerable<SecretDescriptor> secrets)
+    {
+        foreach (var secret in secrets)
+        {
+            var tags = secret.Tags.Count == 0
+                ? string.Empty
+                : $" Tags={FormatTags(secret.Tags)}";
+            var name = Redaction.Redact(secret.Name);
+            Console.WriteLine($"Secret: {name}@{secret.Version} Enabled={secret.IsEnabled}{tags}");
+        }
+    }
+
     public void WriteDiff(IEnumerable<ChangeSummary> changes)
     {
         foreach (var change in changes)
@@ -41,5 +54,12 @@ public sealed class OutputWriter
             var label = string.IsNullOrWhiteSpace(change.Label) ? string.Empty : $" [{change.Label}]";
             Console.WriteLine($"{change.Action}: {change.Key}{label} - {Redaction.Redact(change.Reason)}");
         }
+    }
+
+    private static string FormatTags(IDictionary<string, string> tags)
+    {
+        return string.Join(',', tags
+            .OrderBy(entry => entry.Key, StringComparer.OrdinalIgnoreCase)
+            .Select(entry => $"{entry.Key}={Redaction.Redact(entry.Value)}"));
     }
 }

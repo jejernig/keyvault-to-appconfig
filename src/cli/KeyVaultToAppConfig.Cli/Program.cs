@@ -22,6 +22,11 @@ public static class Program
         var includePrefixOption = new Option<string?>("--include-prefix");
         var excludeRegexOption = new Option<string?>("--exclude-regex");
         var onlyTagOption = new Option<string?>("--only-tag");
+        var enabledOnlyOption = new Option<bool>("--enabled-only");
+        var versionModeOption = new Option<string?>("--version-mode", () => "latest");
+        var versionMapOption = new Option<string?>("--version-map");
+        var pageSizeOption = new Option<int?>("--page-size");
+        var continuationTokenOption = new Option<string?>("--continuation-token");
         var reportJsonOption = new Option<string?>("--report-json");
 
         var rootCommand = new RootCommand("Key Vault to App Configuration standardizer")
@@ -39,6 +44,11 @@ public static class Program
             includePrefixOption,
             excludeRegexOption,
             onlyTagOption,
+            enabledOnlyOption,
+            versionModeOption,
+            versionMapOption,
+            pageSizeOption,
+            continuationTokenOption,
             reportJsonOption
         };
 
@@ -60,6 +70,11 @@ public static class Program
                 IncludePrefix = parse.GetValueForOption(includePrefixOption),
                 ExcludeRegex = parse.GetValueForOption(excludeRegexOption),
                 OnlyTag = parse.GetValueForOption(onlyTagOption),
+                EnabledOnly = parse.GetValueForOption(enabledOnlyOption),
+                VersionMode = parse.GetValueForOption(versionModeOption),
+                VersionMapPath = parse.GetValueForOption(versionMapOption),
+                PageSize = parse.GetValueForOption(pageSizeOption),
+                ContinuationToken = parse.GetValueForOption(continuationTokenOption),
                 ReportJson = parse.GetValueForOption(reportJsonOption)
             };
 
@@ -88,6 +103,11 @@ public static class Program
             IncludePrefix = options.IncludePrefix,
             ExcludeRegex = options.ExcludeRegex,
             OnlyTag = options.OnlyTag,
+            EnabledOnly = options.EnabledOnly,
+            VersionMode = options.VersionMode,
+            VersionMapPath = options.VersionMapPath,
+            PageSize = options.PageSize,
+            ContinuationToken = options.ContinuationToken,
             ReportJson = options.ReportJson
         };
 
@@ -108,6 +128,7 @@ public static class Program
         report.Changes = DeterministicOrdering.OrderChanges(report.Changes).ToList();
         output.WriteRunSummary(report);
         output.WriteFailures(report.Failures);
+        output.WriteEnumeration(report.EnumeratedSecrets);
 
         if (config.ExecutionMode is ExecutionMode.Diff or ExecutionMode.DryRun)
         {

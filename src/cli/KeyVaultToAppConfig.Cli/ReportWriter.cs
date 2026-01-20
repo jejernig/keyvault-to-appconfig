@@ -1,6 +1,7 @@
 using System.Linq;
 using System.Text.Json;
 using KeyVaultToAppConfig.Core;
+using KeyVaultToAppConfig.Core.Enumeration;
 
 namespace KeyVaultToAppConfig.Cli;
 
@@ -32,6 +33,14 @@ public sealed class ReportWriter
             Timestamp = report.Timestamp,
             ExecutionMode = report.ExecutionMode,
             Totals = report.Totals,
+            EnumeratedSecrets = report.EnumeratedSecrets.Select(secret => new SecretDescriptor
+            {
+                Name = Redaction.Redact(secret.Name),
+                Version = secret.Version,
+                IsEnabled = secret.IsEnabled,
+                Tags = RedactTags(secret.Tags),
+                LastUpdated = secret.LastUpdated
+            }).ToList(),
             Changes = report.Changes.Select(change => new ChangeSummary
             {
                 Key = change.Key,
@@ -46,5 +55,16 @@ public sealed class ReportWriter
                 Message = Redaction.Redact(failure.Message)
             }).ToList()
         };
+    }
+
+    private static IDictionary<string, string> RedactTags(IDictionary<string, string> tags)
+    {
+        var redacted = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        foreach (var entry in tags)
+        {
+            redacted[entry.Key] = Redaction.Redact(entry.Value);
+        }
+
+        return redacted;
     }
 }

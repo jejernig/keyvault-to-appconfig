@@ -1,10 +1,25 @@
 using KeyVaultToAppConfig.Core;
 using KeyVaultToAppConfig.Core.Enumeration;
+using KeyVaultToAppConfig.Core.Observability;
+using KeyVaultToAppConfig.Services.Observability;
 
 namespace KeyVaultToAppConfig.Cli;
 
 public sealed class OutputWriter
 {
+    private readonly VerbosityLevel _verbosity;
+    private readonly VerbosityFilter _filter = new();
+
+    public OutputWriter()
+        : this(VerbosityLevel.Normal)
+    {
+    }
+
+    public OutputWriter(VerbosityLevel verbosity)
+    {
+        _verbosity = verbosity;
+    }
+
     public void WriteValidationErrors(IEnumerable<string> errors)
     {
         foreach (var error in errors)
@@ -20,11 +35,18 @@ public sealed class OutputWriter
 
     public void WriteRunSummary(RunReport report)
     {
+        var stopwatch = System.Diagnostics.Stopwatch.StartNew();
         Console.WriteLine($"Run {report.RunId} ({report.ExecutionMode})");
         Console.WriteLine($"Scanned: {report.Totals.Scanned}");
         Console.WriteLine($"Changed: {report.Totals.Changed}");
         Console.WriteLine($"Skipped: {report.Totals.Skipped}");
         Console.WriteLine($"Failed: {report.Totals.Failed}");
+        stopwatch.Stop();
+
+        if (report.Totals.Scanned >= 10_000 && stopwatch.Elapsed > TimeSpan.FromSeconds(1))
+        {
+            Console.Error.WriteLine("warning: summary output exceeded 1s target.");
+        }
     }
 
     public void WriteFailures(IEnumerable<FailureSummary> failures)
@@ -37,6 +59,11 @@ public sealed class OutputWriter
 
     public void WriteEnumeration(IEnumerable<SecretDescriptor> secrets)
     {
+        if (!_filter.Allows(_verbosity, VerbosityLevel.Verbose))
+        {
+            return;
+        }
+
         foreach (var secret in secrets)
         {
             var tags = secret.Tags.Count == 0
@@ -49,6 +76,11 @@ public sealed class OutputWriter
 
     public void WriteDiff(IEnumerable<ChangeSummary> changes)
     {
+        if (!_filter.Allows(_verbosity, VerbosityLevel.Normal))
+        {
+            return;
+        }
+
         foreach (var change in changes)
         {
             var label = string.IsNullOrWhiteSpace(change.Label) ? string.Empty : $" [{change.Label}]";

@@ -3,6 +3,8 @@ using Azure.Security.KeyVault.Secrets;
 using KeyVaultToAppConfig.Core;
 using KeyVaultToAppConfig.Core.Auth;
 using KeyVaultToAppConfig.Core.Enumeration;
+using KeyVaultToAppConfig.Core.Observability;
+using KeyVaultToAppConfig.Services.Observability;
 
 namespace KeyVaultToAppConfig.Services;
 
@@ -10,6 +12,14 @@ public sealed class ExecutionService
 {
     public async Task<RunReport> ExecuteAsync(RunConfiguration config, CancellationToken cancellationToken)
     {
+        var correlationProvider = new CorrelationIdProvider();
+        var correlationId = correlationProvider.GetOrCreate(config.CorrelationId);
+        var logWriter = new StructuredLogWriter();
+        Log(logWriter, correlationId, "run-start", "info", "Run started.", new Dictionary<string, string>
+        {
+            ["mode"] = config.ExecutionMode.ToString().ToLowerInvariant()
+        });
+
         var diagnostics = new AuthDiagnostics();
         var violations = diagnostics.ValidateNoStaticSecrets(new[]
         {
@@ -23,9 +33,14 @@ public sealed class ExecutionService
 
         if (violations.Count > 0)
         {
+            Log(logWriter, correlationId, "run-failed", "error", "Run blocked due to validation errors.", new Dictionary<string, string>
+            {
+                ["errorType"] = "static-secret"
+            });
+
             return new RunReport
             {
-                RunId = Guid.NewGuid().ToString("N"),
+                RunId = correlationId,
                 ExecutionMode = config.ExecutionMode,
                 Timestamp = DateTimeOffset.UtcNow,
                 Totals = new Totals { Failed = 1 },
@@ -50,9 +65,14 @@ public sealed class ExecutionService
 
         if (!authResult.IsSuccess)
         {
+            Log(logWriter, correlationId, "run-failed", "error", "Authentication failed.", new Dictionary<string, string>
+            {
+                ["errorType"] = authResult.ErrorCategory.ToString().ToLowerInvariant()
+            });
+
             return new RunReport
             {
-                RunId = Guid.NewGuid().ToString("N"),
+                RunId = correlationId,
                 ExecutionMode = config.ExecutionMode,
                 Timestamp = DateTimeOffset.UtcNow,
                 Totals = new Totals { Failed = 1 },
@@ -84,7 +104,7 @@ public sealed class ExecutionService
 
             return new RunReport
             {
-                RunId = Guid.NewGuid().ToString("N"),
+                RunId = correlationId,
                 ExecutionMode = config.ExecutionMode,
                 Timestamp = DateTimeOffset.UtcNow,
                 Totals = new Totals
@@ -96,9 +116,14 @@ public sealed class ExecutionService
         }
         catch (Exception ex)
         {
+            Log(logWriter, correlationId, "run-failed", "error", "Run failed with exception.", new Dictionary<string, string>
+            {
+                ["errorType"] = "fatal"
+            });
+
             return new RunReport
             {
-                RunId = Guid.NewGuid().ToString("N"),
+                RunId = correlationId,
                 ExecutionMode = config.ExecutionMode,
                 Timestamp = DateTimeOffset.UtcNow,
                 Totals = new Totals { Failed = 1 },
@@ -113,5 +138,24 @@ public sealed class ExecutionService
                 }
             };
         }
+    }
+
+    private static void Log(
+        StructuredLogWriter writer,
+        string correlationId,
+        string eventName,
+        string level,
+        string message,
+        IDictionary<string, string> data)
+    {
+        writer.Write(new LogEntry
+        {
+            Timestamp = DateTimeOffset.UtcNow,
+            Level = level,
+            Event = eventName,
+            CorrelationId = correlationId,
+            Message = message,
+            Data = data
+        });
     }
 }

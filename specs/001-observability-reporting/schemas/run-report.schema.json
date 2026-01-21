@@ -1,0 +1,70 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "RunReport",
+  "type": "object",
+  "required": [
+    "correlationId",
+    "runMode",
+    "verbosity",
+    "totals",
+    "items",
+    "failures",
+    "generatedAt"
+  ],
+  "properties": {
+    "correlationId": {
+      "type": "string"
+    },
+    "runMode": {
+      "type": "string"
+    },
+    "verbosity": {
+      "type": "string",
+      "enum": ["minimal", "normal", "verbose"]
+    },
+    "totals": {
+      "type": "object",
+      "required": ["total", "changes", "skips", "failures"],
+      "properties": {
+        "total": { "type": "integer" },
+        "changes": { "type": "integer" },
+        "skips": { "type": "integer" },
+        "failures": { "type": "integer" }
+      }
+    },
+    "items": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["key", "outcome"],
+        "properties": {
+          "key": { "type": "string" },
+          "label": { "type": ["string", "null"] },
+          "outcome": {
+            "type": "string",
+            "enum": ["changed", "skipped", "failed", "unchanged"]
+          },
+          "reason": { "type": ["string", "null"] },
+          "timestamp": { "type": "string", "format": "date-time" }
+        }
+      }
+    },
+    "failures": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["key", "errorType", "message"],
+        "properties": {
+          "key": { "type": "string" },
+          "label": { "type": ["string", "null"] },
+          "errorType": { "type": "string" },
+          "message": { "type": "string" }
+        }
+      }
+    },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}

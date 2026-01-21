@@ -4,6 +4,7 @@ using System.Text.Json.Serialization;
 using KeyVaultToAppConfig.Core;
 using KeyVaultToAppConfig.Core.Enumeration;
 using KeyVaultToAppConfig.Core.Planning;
+using KeyVaultToAppConfig.Core.Secrets;
 using KeyVaultToAppConfig.Core.Writes;
 
 namespace KeyVaultToAppConfig.Cli;
@@ -59,6 +60,22 @@ public sealed class ReportWriter
 
         await using var stream = File.Create(outputPath);
         await JsonSerializer.SerializeAsync(stream, sanitizedReport, JsonOptions, cancellationToken);
+    }
+
+    public async Task WriteSecretHandlingReportJsonAsync(
+        ModeExecutionResult result,
+        string outputPath,
+        CancellationToken cancellationToken)
+    {
+        var report = BuildSecretHandlingReport(result);
+        var directory = Path.GetDirectoryName(outputPath);
+        if (!string.IsNullOrWhiteSpace(directory))
+        {
+            Directory.CreateDirectory(directory);
+        }
+
+        await using var stream = File.Create(outputPath);
+        await JsonSerializer.SerializeAsync(stream, report, JsonOptions, cancellationToken);
     }
 
     private static RunReport RedactReport(RunReport report)
@@ -179,6 +196,64 @@ public sealed class ReportWriter
         };
     }
 
+    private static SecretHandlingReportSummary BuildSecretHandlingReport(ModeExecutionResult result)
+    {
+        var changes = result.Items
+            .Where(item => item.Outcome == SecretHandlingOutcome.Allowed)
+            .Select(item => new SecretHandlingItemSummary
+            {
+                Key = Redaction.Redact(item.Key),
+                Outcome = item.Outcome.ToString().ToLowerInvariant(),
+                GuardrailsSatisfied = item.GuardrailsSatisfied,
+                AllowedKey = item.AllowedKey,
+                ResolvedVersion = item.ResolvedVersion
+            })
+            .ToList();
+
+        var skips = result.Items
+            .Where(item => item.Outcome == SecretHandlingOutcome.Skipped)
+            .Select(item => new SecretHandlingItemSummary
+            {
+                Key = Redaction.Redact(item.Key),
+                Outcome = item.Outcome.ToString().ToLowerInvariant(),
+                GuardrailsSatisfied = item.GuardrailsSatisfied,
+                AllowedKey = item.AllowedKey,
+                ResolvedVersion = item.ResolvedVersion
+            })
+            .ToList();
+
+        var failures = result.Items
+            .Where(item => item.Outcome == SecretHandlingOutcome.Failed)
+            .Select(item => new SecretHandlingItemSummary
+            {
+                Key = Redaction.Redact(item.Key),
+                Outcome = item.Outcome.ToString().ToLowerInvariant(),
+                GuardrailsSatisfied = item.GuardrailsSatisfied,
+                AllowedKey = item.AllowedKey,
+                ResolvedVersion = item.ResolvedVersion,
+                FailureReason = Redaction.Redact(item.FailureReason)
+            })
+            .ToList();
+
+        var totals = new SecretHandlingTotals
+        {
+            TotalCount = result.Items.Count,
+            ChangeCount = changes.Count,
+            SkipCount = skips.Count,
+            FailedCount = failures.Count
+        };
+
+        return new SecretHandlingReportSummary
+        {
+            CorrelationId = result.CorrelationId,
+            Mode = result.Mode.ToString().ToLowerInvariant(),
+            Totals = totals,
+            Changes = changes,
+            Skips = skips,
+            Failures = failures
+        };
+    }
+
     private sealed class PlanReport
     {
         [JsonPropertyName("correlationId")]
@@ -252,6 +327,63 @@ public sealed class ReportWriter
 
         [JsonPropertyName("retryCount")]
         public int RetryCount { get; set; }
+
+        [JsonPropertyName("failureReason")]
+        public string? FailureReason { get; set; }
+    }
+
+    private sealed class SecretHandlingReportSummary
+    {
+        [JsonPropertyName("correlationId")]
+        public string CorrelationId { get; set; } = string.Empty;
+
+        [JsonPropertyName("mode")]
+        public string Mode { get; set; } = string.Empty;
+
+        [JsonPropertyName("totals")]
+        public SecretHandlingTotals Totals { get; set; } = new();
+
+        [JsonPropertyName("changes")]
+        public List<SecretHandlingItemSummary> Changes { get; set; } = new();
+
+        [JsonPropertyName("skips")]
+        public List<SecretHandlingItemSummary> Skips { get; set; } = new();
+
+        [JsonPropertyName("failures")]
+        public List<SecretHandlingItemSummary> Failures { get; set; } = new();
+    }
+
+    private sealed class SecretHandlingTotals
+    {
+        [JsonPropertyName("total")]
+        public int TotalCount { get; set; }
+
+        [JsonPropertyName("changes")]
+        public int ChangeCount { get; set; }
+
+        [JsonPropertyName("skips")]
+        public int SkipCount { get; set; }
+
+        [JsonPropertyName("failures")]
+        public int FailedCount { get; set; }
+    }
+
+    private sealed class SecretHandlingItemSummary
+    {
+        [JsonPropertyName("key")]
+        public string Key { get; set; } = string.Empty;
+
+        [JsonPropertyName("outcome")]
+        public string Outcome { get; set; } = string.Empty;
+
+        [JsonPropertyName("guardrailsSatisfied")]
+        public bool GuardrailsSatisfied { get; set; }
+
+        [JsonPropertyName("allowedKey")]
+        public bool AllowedKey { get; set; }
+
+        [JsonPropertyName("resolvedVersion")]
+        public string? ResolvedVersion { get; set; }
 
         [JsonPropertyName("failureReason")]
         public string? FailureReason { get; set; }

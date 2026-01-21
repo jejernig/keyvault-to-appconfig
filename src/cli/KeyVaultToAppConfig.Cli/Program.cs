@@ -57,6 +57,7 @@ public static class Program
         rootCommand.Add(DiffCommand.Build());
         rootCommand.Add(DryRunCommand.Build());
         rootCommand.Add(ApplyCommand.Build());
+        rootCommand.Add(SecretModeCommand.Build());
 
         rootCommand.SetAction(async (parseResult, cancellationToken) =>
         {

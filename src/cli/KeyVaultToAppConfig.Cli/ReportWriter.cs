@@ -1,7 +1,9 @@
 using System.Linq;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using KeyVaultToAppConfig.Core;
 using KeyVaultToAppConfig.Core.Enumeration;
+using KeyVaultToAppConfig.Core.Planning;
 
 namespace KeyVaultToAppConfig.Cli;
 
@@ -15,6 +17,23 @@ public sealed class ReportWriter
     public async Task WriteJsonAsync(RunReport report, string outputPath, CancellationToken cancellationToken)
     {
         var sanitizedReport = RedactReport(report);
+        var directory = Path.GetDirectoryName(outputPath);
+        if (!string.IsNullOrWhiteSpace(directory))
+        {
+            Directory.CreateDirectory(directory);
+        }
+
+        await using var stream = File.Create(outputPath);
+        await JsonSerializer.SerializeAsync(stream, sanitizedReport, JsonOptions, cancellationToken);
+    }
+
+    public async Task WritePlanJsonAsync(
+        PlanOutput plan,
+        string correlationId,
+        string outputPath,
+        CancellationToken cancellationToken)
+    {
+        var sanitizedReport = RedactPlanReport(plan, correlationId);
         var directory = Path.GetDirectoryName(outputPath);
         if (!string.IsNullOrWhiteSpace(directory))
         {
@@ -57,6 +76,30 @@ public sealed class ReportWriter
         };
     }
 
+    private static PlanReport RedactPlanReport(PlanOutput plan, string correlationId)
+    {
+        return new PlanReport
+        {
+            CorrelationId = correlationId,
+            GeneratedAt = plan.GeneratedAt,
+            Totals = plan.Totals,
+            Changes = plan.DiffItems.Select(item => new ChangeSummary
+            {
+                Key = item.Key,
+                Label = item.Label,
+                Action = item.Classification.ToString().ToLowerInvariant(),
+                Reason = Redaction.Redact(item.Reason)
+            }).ToList(),
+            Skips = plan.Conflicts.Select(conflict => new PlanSkip
+            {
+                Key = conflict.Key,
+                Label = conflict.Label,
+                Reason = "Conflict"
+            }).ToList(),
+            Failures = new List<FailureSummary>()
+        };
+    }
+
     private static IDictionary<string, string> RedactTags(IDictionary<string, string> tags)
     {
         var redacted = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
@@ -66,5 +109,38 @@ public sealed class ReportWriter
         }
 
         return redacted;
+    }
+
+    private sealed class PlanReport
+    {
+        [JsonPropertyName("correlationId")]
+        public string CorrelationId { get; set; } = string.Empty;
+
+        [JsonPropertyName("generatedAt")]
+        public DateTimeOffset GeneratedAt { get; set; }
+
+        [JsonPropertyName("totals")]
+        public PlanTotals Totals { get; set; } = new();
+
+        [JsonPropertyName("changes")]
+        public List<ChangeSummary> Changes { get; set; } = new();
+
+        [JsonPropertyName("skips")]
+        public List<PlanSkip> Skips { get; set; } = new();
+
+        [JsonPropertyName("failures")]
+        public List<FailureSummary> Failures { get; set; } = new();
+    }
+
+    private sealed class PlanSkip
+    {
+        [JsonPropertyName("key")]
+        public string Key { get; set; } = string.Empty;
+
+        [JsonPropertyName("label")]
+        public string Label { get; set; } = string.Empty;
+
+        [JsonPropertyName("reason")]
+        public string Reason { get; set; } = string.Empty;
     }
 }

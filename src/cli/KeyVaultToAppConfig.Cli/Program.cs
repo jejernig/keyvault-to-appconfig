@@ -53,6 +53,9 @@ public static class Program
         rootCommand.Add(MappingSpecCommand.Build());
         rootCommand.Add(MappingValidateCommand.Build());
         rootCommand.Add(MappingRunCommand.Build());
+        rootCommand.Add(PlanCommand.Build());
+        rootCommand.Add(DiffCommand.Build());
+        rootCommand.Add(DryRunCommand.Build());
 
         rootCommand.SetAction(async (parseResult, cancellationToken) =>
         {

@@ -1,0 +1,245 @@
+openapi: 3.0.3
+info:
+  title: Planning and Diff Engine API
+  version: 1.0.0
+  description: API contract for planning desired state and diffing against existing App Configuration state.
+servers:
+  - url: https://example.local
+paths:
+  /plans:
+    post:
+      summary: Generate a plan from desired state inputs
+      operationId: createPlan
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PlanRequest'
+      responses:
+        '200':
+          description: Plan output
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlanOutput'
+        '400':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+  /plans/diff:
+    post:
+      summary: Compute diff between desired and existing state
+      operationId: computeDiff
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DiffRequest'
+      responses:
+        '200':
+          description: Diff output
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlanOutput'
+        '400':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+  /plans/dry-run:
+    post:
+      summary: Execute dry-run for desired state
+      operationId: dryRunPlan
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PlanRequest'
+      responses:
+        '200':
+          description: Dry-run output
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlanOutput'
+        '400':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+components:
+  schemas:
+    PlanRequest:
+      type: object
+      required:
+        - desiredState
+      properties:
+        desiredState:
+          $ref: '#/components/schemas/DesiredState'
+        existingState:
+          $ref: '#/components/schemas/ExistingStateSnapshot'
+        scope:
+          $ref: '#/components/schemas/Scope'
+    DiffRequest:
+      type: object
+      required:
+        - desiredState
+        - existingState
+      properties:
+        desiredState:
+          $ref: '#/components/schemas/DesiredState'
+        existingState:
+          $ref: '#/components/schemas/ExistingStateSnapshot'
+        scope:
+          $ref: '#/components/schemas/Scope'
+    DesiredState:
+      type: object
+      required:
+        - entries
+      properties:
+        entries:
+          type: array
+          items:
+            $ref: '#/components/schemas/DesiredEntry'
+    DesiredEntry:
+      type: object
+      required:
+        - key
+        - label
+        - value
+      properties:
+        key:
+          type: string
+        label:
+          type: string
+        value:
+          type: string
+        contentType:
+          type: string
+        sourceId:
+          type: string
+    ExistingStateSnapshot:
+      type: object
+      required:
+        - entries
+      properties:
+        entries:
+          type: array
+          items:
+            $ref: '#/components/schemas/ExistingEntry'
+    ExistingEntry:
+      type: object
+      required:
+        - key
+        - label
+        - value
+      properties:
+        key:
+          type: string
+        label:
+          type: string
+        value:
+          type: string
+        contentType:
+          type: string
+        lastModified:
+          type: string
+    Scope:
+      type: object
+      properties:
+        keyPrefix:
+          type: string
+        labels:
+          type: array
+          items:
+            type: string
+        pageSize:
+          type: integer
+        continuationToken:
+          type: string
+    PlanOutput:
+      type: object
+      required:
+        - diffItems
+        - totals
+      properties:
+        diffItems:
+          type: array
+          items:
+            $ref: '#/components/schemas/DiffItem'
+        conflicts:
+          type: array
+          items:
+            $ref: '#/components/schemas/ConflictRecord'
+        totals:
+          $ref: '#/components/schemas/PlanTotals'
+    DiffItem:
+      type: object
+      required:
+        - key
+        - label
+        - classification
+      properties:
+        key:
+          type: string
+        label:
+          type: string
+        classification:
+          type: string
+          enum: [create, update, unchanged]
+        reason:
+          type: string
+        desiredValue:
+          type: string
+        existingValue:
+          type: string
+    ConflictRecord:
+      type: object
+      required:
+        - key
+        - label
+        - conflictingValues
+      properties:
+        key:
+          type: string
+        label:
+          type: string
+        conflictingValues:
+          type: array
+          items:
+            type: string
+        resolutionStatus:
+          type: string
+    PlanTotals:
+      type: object
+      required:
+        - create
+        - update
+        - unchanged
+        - conflicts
+      properties:
+        create:
+          type: integer
+        update:
+          type: integer
+        unchanged:
+          type: integer
+        conflicts:
+          type: integer
+    ValidationError:
+      type: object
+      required:
+        - message
+      properties:
+        message:
+          type: string
+        field:
+          type: string

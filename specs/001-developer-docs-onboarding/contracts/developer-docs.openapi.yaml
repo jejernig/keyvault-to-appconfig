@@ -1,0 +1,51 @@
+openapi: 3.0.3
+info:
+  title: Developer Documentation & Onboarding
+  version: 1.0.0
+  description: Documentation contract for onboarding content coverage.
+servers:
+  - url: https://example.local
+paths:
+  /docs/onboarding:
+    get:
+      summary: Fetch onboarding documentation metadata
+      operationId: getOnboardingDocs
+      responses:
+        '200':
+          description: Onboarding documentation metadata
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OnboardingDoc'
+components:
+  schemas:
+    OnboardingDoc:
+      type: object
+      required:
+        - title
+        - purpose
+        - audience
+        - location
+        - format
+        - requiredInputs
+        - securityNotes
+      properties:
+        title:
+          type: string
+        purpose:
+          type: string
+        audience:
+          type: string
+        location:
+          type: string
+        format:
+          type: string
+          enum: [readme, docs-markdown]
+        requiredInputs:
+          type: array
+          items:
+            type: string
+        securityNotes:
+          type: array
+          items:
+            type: string

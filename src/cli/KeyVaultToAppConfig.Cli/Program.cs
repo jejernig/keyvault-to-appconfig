@@ -56,6 +56,7 @@ public static class Program
         rootCommand.Add(PlanCommand.Build());
         rootCommand.Add(DiffCommand.Build());
         rootCommand.Add(DryRunCommand.Build());
+        rootCommand.Add(ApplyCommand.Build());
 
         rootCommand.SetAction(async (parseResult, cancellationToken) =>
         {

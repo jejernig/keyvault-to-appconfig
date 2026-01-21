@@ -1,0 +1,108 @@
+openapi: 3.0.3
+info:
+  title: Observability & Reporting
+  version: 1.0.0
+  description: API contract for audit-safe run reporting and log correlation.
+servers:
+  - url: https://example.local
+paths:
+  /runs/{runId}/report:
+    get:
+      summary: Fetch a run report
+      operationId: getRunReport
+      parameters:
+        - in: path
+          name: runId
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Run report
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RunReport'
+        '404':
+          description: Report not found
+components:
+  schemas:
+    RunReport:
+      type: object
+      required:
+        - correlationId
+        - runMode
+        - verbosity
+        - totals
+        - items
+        - generatedAt
+      properties:
+        correlationId:
+          type: string
+        runMode:
+          type: string
+        verbosity:
+          type: string
+          enum: [minimal, normal, verbose]
+        totals:
+          $ref: '#/components/schemas/Totals'
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/ReportItem'
+        failures:
+          type: array
+          items:
+            $ref: '#/components/schemas/FailureDetail'
+        generatedAt:
+          type: string
+          format: date-time
+    Totals:
+      type: object
+      required:
+        - total
+        - changes
+        - skips
+        - failures
+      properties:
+        total:
+          type: integer
+        changes:
+          type: integer
+        skips:
+          type: integer
+        failures:
+          type: integer
+    ReportItem:
+      type: object
+      required:
+        - key
+        - outcome
+      properties:
+        key:
+          type: string
+        label:
+          type: string
+        outcome:
+          type: string
+          enum: [changed, skipped, failed, unchanged]
+        reason:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+    FailureDetail:
+      type: object
+      required:
+        - key
+        - errorType
+        - message
+      properties:
+        key:
+          type: string
+        label:
+          type: string
+        errorType:
+          type: string
+        message:
+          type: string

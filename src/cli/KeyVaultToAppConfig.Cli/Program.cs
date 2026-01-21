@@ -1,7 +1,9 @@
 using System.CommandLine;
 using KeyVaultToAppConfig.Cli.Commands;
 using KeyVaultToAppConfig.Core;
+using KeyVaultToAppConfig.Core.Observability;
 using KeyVaultToAppConfig.Services;
+using KeyVaultToAppConfig.Services.Observability;
 
 namespace KeyVaultToAppConfig.Cli;
 
@@ -28,6 +30,8 @@ public static class Program
         var pageSizeOption = new Option<int?>("--page-size");
         var continuationTokenOption = new Option<string?>("--continuation-token");
         var reportJsonOption = new Option<string?>("--report-json");
+        var verbosityOption = new Option<string?>("--verbosity") { DefaultValueFactory = _ => "normal" };
+        var correlationIdOption = new Option<string?>("--correlation-id");
 
         var rootCommand = new RootCommand("Key Vault to App Configuration standardizer");
         rootCommand.Add(keyvaultUriOption);
@@ -49,6 +53,8 @@ public static class Program
         rootCommand.Add(pageSizeOption);
         rootCommand.Add(continuationTokenOption);
         rootCommand.Add(reportJsonOption);
+        rootCommand.Add(verbosityOption);
+        rootCommand.Add(correlationIdOption);
 
         rootCommand.Add(MappingSpecCommand.Build());
         rootCommand.Add(MappingValidateCommand.Build());
@@ -81,7 +87,9 @@ public static class Program
                 VersionMapPath = parseResult.GetValue(versionMapOption),
                 PageSize = parseResult.GetValue(pageSizeOption),
                 ContinuationToken = parseResult.GetValue(continuationTokenOption),
-                ReportJson = parseResult.GetValue(reportJsonOption)
+                ReportJson = parseResult.GetValue(reportJsonOption),
+                Verbosity = parseResult.GetValue(verbosityOption),
+                CorrelationId = parseResult.GetValue(correlationIdOption)
             };
 
             return await RunAsync(options, cancellationToken);
@@ -114,7 +122,9 @@ public static class Program
             VersionMapPath = options.VersionMapPath,
             PageSize = options.PageSize,
             ContinuationToken = options.ContinuationToken,
-            ReportJson = options.ReportJson
+            ReportJson = options.ReportJson,
+            Verbosity = options.Verbosity,
+            CorrelationId = options.CorrelationId
         };
 
         var validation = validator.Validate(input);
@@ -128,6 +138,7 @@ public static class Program
         }
 
         var config = validator.BuildConfiguration(input);
+        output = new OutputWriter(config.Verbosity);
         var executionService = new ExecutionService();
         var report = await executionService.ExecuteAsync(config, cancellationToken);
 
@@ -144,19 +155,14 @@ public static class Program
         if (!string.IsNullOrWhiteSpace(config.ReportJson))
         {
             var reportWriter = new ReportWriter();
-            await reportWriter.WriteJsonAsync(report, config.ReportJson, cancellationToken);
+            var builder = new RunReportBuilder();
+            var observabilityReport = builder.Build(report, config.Verbosity, report.RunId);
+            await reportWriter.WriteObservabilityReportJsonAsync(
+                observabilityReport,
+                config.ReportJson,
+                cancellationToken);
         }
 
-        if (report.Totals.Failed > 0)
-        {
-            return ExitCodes.PartialFailures;
-        }
-
-        if (report.Totals.Changed > 0)
-        {
-            return ExitCodes.SuccessWithChanges;
-        }
-
-        return ExitCodes.SuccessNoChanges;
+        return ObservabilityExitCodes.MapFromFailures(report.Totals.Failed);
     }
 }

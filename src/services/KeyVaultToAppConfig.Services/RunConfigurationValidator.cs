@@ -1,6 +1,7 @@
 using System.Linq;
 using System.Text.RegularExpressions;
 using KeyVaultToAppConfig.Core;
+using KeyVaultToAppConfig.Core.Observability;
 
 namespace KeyVaultToAppConfig.Services;
 
@@ -79,6 +80,12 @@ public sealed class RunConfigurationValidator
             result.Errors.Add("--page-size must be >= 1 when provided.");
         }
 
+        if (!string.IsNullOrWhiteSpace(options.Verbosity)
+            && !TryParseVerbosity(options.Verbosity, out _))
+        {
+            result.Errors.Add("--verbosity must be minimal, normal, or verbose.");
+        }
+
         if (!string.IsNullOrWhiteSpace(options.OnlyTag)
             && !options.OnlyTag.Contains('=', StringComparison.Ordinal))
         {
@@ -108,8 +115,39 @@ public sealed class RunConfigurationValidator
             ContinuationToken = options.ContinuationToken,
             ReportJson = options.ReportJson,
             Mode = options.Mode,
-            ConfirmCopyValue = options.ConfirmCopyValue
+            ConfirmCopyValue = options.ConfirmCopyValue,
+            Verbosity = ParseVerbosity(options.Verbosity),
+            CorrelationId = options.CorrelationId
         };
+    }
+
+    private static VerbosityLevel ParseVerbosity(string? value)
+    {
+        return TryParseVerbosity(value, out var verbosity) ? verbosity : VerbosityLevel.Normal;
+    }
+
+    private static bool TryParseVerbosity(string? value, out VerbosityLevel verbosity)
+    {
+        if (string.Equals(value, "minimal", StringComparison.OrdinalIgnoreCase))
+        {
+            verbosity = VerbosityLevel.Minimal;
+            return true;
+        }
+
+        if (string.Equals(value, "verbose", StringComparison.OrdinalIgnoreCase))
+        {
+            verbosity = VerbosityLevel.Verbose;
+            return true;
+        }
+
+        if (string.IsNullOrWhiteSpace(value) || string.Equals(value, "normal", StringComparison.OrdinalIgnoreCase))
+        {
+            verbosity = VerbosityLevel.Normal;
+            return true;
+        }
+
+        verbosity = VerbosityLevel.Normal;
+        return false;
     }
 
     private static ExecutionMode ResolveExecutionMode(RunConfigurationInput options)

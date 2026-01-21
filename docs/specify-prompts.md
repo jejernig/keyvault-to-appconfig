@@ -208,6 +208,38 @@ Ensure repeatable, deterministic builds.
 
 ---
 
+## Epic L — Developer Documentation & Onboarding
+
+**/prompts:speckit.specify**
+
+Act as a Senior Platform Engineer responsible for developer enablement.
+
+Specify all features required for **Developer Documentation & Onboarding** for this tool. The goal is to enable a **new engineer** to safely install, configure, and run the application without tribal knowledge.
+
+For each feature, define:
+
+* Purpose and target audience
+* Documentation location and format (README, docs/, markdown)
+* Required inputs, values, and configuration
+* Security considerations and guardrails
+* Acceptance criteria
+
+Documentation must explicitly cover:
+
+* How to build and run the tool locally
+* Required Azure resources and prerequisites
+* Required permissions and RBAC roles
+* Identity options (Managed Identity, Workload Identity, local dev)
+* Required configuration values and CLI arguments
+* Handling of secrets, passwords, certificates, and APIs
+* Safe vs restricted modes (Key Vault reference vs copy-value)
+* Example commands for dry-run and apply
+* Common failure modes and troubleshooting steps
+
+Documentation must be clear, minimal, security-conscious, and suitable for onboarding a new team member.
+
+---
+
 ## Usage Guidance
 
 * Run `/prompts:speckit.specify` once per Epic

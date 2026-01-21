@@ -3,6 +3,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using KeyVaultToAppConfig.Core;
 using KeyVaultToAppConfig.Core.Enumeration;
+using KeyVaultToAppConfig.Core.Observability;
 using KeyVaultToAppConfig.Core.Planning;
 using KeyVaultToAppConfig.Core.Secrets;
 using KeyVaultToAppConfig.Core.Writes;
@@ -60,6 +61,21 @@ public sealed class ReportWriter
 
         await using var stream = File.Create(outputPath);
         await JsonSerializer.SerializeAsync(stream, sanitizedReport, JsonOptions, cancellationToken);
+    }
+
+    public async Task WriteObservabilityReportJsonAsync(
+        RunReportModel report,
+        string outputPath,
+        CancellationToken cancellationToken)
+    {
+        var directory = Path.GetDirectoryName(outputPath);
+        if (!string.IsNullOrWhiteSpace(directory))
+        {
+            Directory.CreateDirectory(directory);
+        }
+
+        await using var stream = File.Create(outputPath);
+        await JsonSerializer.SerializeAsync(stream, report, JsonOptions, cancellationToken);
     }
 
     public async Task WriteSecretHandlingReportJsonAsync(

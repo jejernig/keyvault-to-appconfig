@@ -21,4 +21,6 @@ public sealed class CliOptions
     public int? PageSize { get; set; }
     public string? ContinuationToken { get; set; }
     public string? ReportJson { get; set; }
+    public string? Verbosity { get; set; }
+    public string? CorrelationId { get; set; }
 }

@@ -4,6 +4,7 @@ using System.Text.Json.Serialization;
 using KeyVaultToAppConfig.Core;
 using KeyVaultToAppConfig.Core.Enumeration;
 using KeyVaultToAppConfig.Core.Planning;
+using KeyVaultToAppConfig.Core.Writes;
 
 namespace KeyVaultToAppConfig.Cli;
 
@@ -34,6 +35,22 @@ public sealed class ReportWriter
         CancellationToken cancellationToken)
     {
         var sanitizedReport = RedactPlanReport(plan, correlationId);
+        var directory = Path.GetDirectoryName(outputPath);
+        if (!string.IsNullOrWhiteSpace(directory))
+        {
+            Directory.CreateDirectory(directory);
+        }
+
+        await using var stream = File.Create(outputPath);
+        await JsonSerializer.SerializeAsync(stream, sanitizedReport, JsonOptions, cancellationToken);
+    }
+
+    public async Task WriteWriteReportJsonAsync(
+        WriteReport report,
+        string outputPath,
+        CancellationToken cancellationToken)
+    {
+        var sanitizedReport = RedactWriteReport(report);
         var directory = Path.GetDirectoryName(outputPath);
         if (!string.IsNullOrWhiteSpace(directory))
         {
@@ -111,6 +128,57 @@ public sealed class ReportWriter
         return redacted;
     }
 
+    private static WriteReportSummary RedactWriteReport(WriteReport report)
+    {
+        var changes = report.Results
+            .Where(result => result.Status == WriteStatus.Succeeded)
+            .Select(result => new WriteResultSummary
+            {
+                Key = Redaction.Redact(result.Key),
+                Label = Redaction.Redact(result.Label),
+                Status = result.Status.ToString().ToLowerInvariant(),
+                Attempts = result.Attempts,
+                RetryCount = result.RetryCount
+            })
+            .ToList();
+
+        var skips = report.Results
+            .Where(result => result.Status == WriteStatus.Skipped)
+            .Select(result => new WriteResultSummary
+            {
+                Key = Redaction.Redact(result.Key),
+                Label = Redaction.Redact(result.Label),
+                Status = result.Status.ToString().ToLowerInvariant(),
+                Attempts = result.Attempts,
+                RetryCount = result.RetryCount
+            })
+            .ToList();
+
+        var failures = report.Results
+            .Where(result => result.Status is WriteStatus.Failed or WriteStatus.RolledBack)
+            .Select(result => new WriteResultSummary
+            {
+                Key = Redaction.Redact(result.Key),
+                Label = Redaction.Redact(result.Label),
+                Status = result.Status.ToString().ToLowerInvariant(),
+                Attempts = result.Attempts,
+                RetryCount = result.RetryCount,
+                FailureReason = Redaction.Redact(result.FailureReason)
+            })
+            .ToList();
+
+        return new WriteReportSummary
+        {
+            CorrelationId = report.CorrelationId,
+            StartedAt = report.StartedAt,
+            CompletedAt = report.CompletedAt,
+            Totals = report.Totals,
+            Changes = changes,
+            Skips = skips,
+            Failures = failures
+        };
+    }
+
     private sealed class PlanReport
     {
         [JsonPropertyName("correlationId")]
@@ -142,5 +210,50 @@ public sealed class ReportWriter
 
         [JsonPropertyName("reason")]
         public string Reason { get; set; } = string.Empty;
+    }
+
+    private sealed class WriteReportSummary
+    {
+        [JsonPropertyName("correlationId")]
+        public string CorrelationId { get; set; } = string.Empty;
+
+        [JsonPropertyName("startedAt")]
+        public DateTimeOffset StartedAt { get; set; }
+
+        [JsonPropertyName("completedAt")]
+        public DateTimeOffset CompletedAt { get; set; }
+
+        [JsonPropertyName("totals")]
+        public WriteTotals Totals { get; set; } = new();
+
+        [JsonPropertyName("changes")]
+        public List<WriteResultSummary> Changes { get; set; } = new();
+
+        [JsonPropertyName("skips")]
+        public List<WriteResultSummary> Skips { get; set; } = new();
+
+        [JsonPropertyName("failures")]
+        public List<WriteResultSummary> Failures { get; set; } = new();
+    }
+
+    private sealed class WriteResultSummary
+    {
+        [JsonPropertyName("key")]
+        public string Key { get; set; } = string.Empty;
+
+        [JsonPropertyName("label")]
+        public string Label { get; set; } = string.Empty;
+
+        [JsonPropertyName("status")]
+        public string Status { get; set; } = string.Empty;
+
+        [JsonPropertyName("attempts")]
+        public int Attempts { get; set; }
+
+        [JsonPropertyName("retryCount")]
+        public int RetryCount { get; set; }
+
+        [JsonPropertyName("failureReason")]
+        public string? FailureReason { get; set; }
     }
 }

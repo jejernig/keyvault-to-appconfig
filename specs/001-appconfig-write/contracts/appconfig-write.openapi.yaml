@@ -1,0 +1,176 @@
+openapi: 3.0.3
+info:
+  title: App Configuration Write API
+  version: 1.0.0
+  description: API contract for applying safe, idempotent writes to App Configuration.
+servers:
+  - url: https://example.local
+paths:
+  /writes/apply:
+    post:
+      summary: Apply write plan to App Configuration
+      operationId: applyWrites
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApplyWriteRequest'
+      responses:
+        '200':
+          description: Write report
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WriteReport'
+        '400':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+components:
+  schemas:
+    ApplyWriteRequest:
+      type: object
+      required:
+        - writePlan
+      properties:
+        writePlan:
+          $ref: '#/components/schemas/WritePlan'
+        options:
+          $ref: '#/components/schemas/WriteOptions'
+    WriteOptions:
+      type: object
+      properties:
+        maxParallelism:
+          type: integer
+        retryPolicy:
+          $ref: '#/components/schemas/RetryPolicy'
+        rollback:
+          $ref: '#/components/schemas/RollbackOptions'
+    WritePlan:
+      type: object
+      required:
+        - actions
+      properties:
+        actions:
+          type: array
+          items:
+            $ref: '#/components/schemas/WriteAction'
+        labelContext:
+          $ref: '#/components/schemas/LabelContext'
+        managedMetadata:
+          $ref: '#/components/schemas/ManagedMetadata'
+    WriteAction:
+      type: object
+      required:
+        - key
+        - label
+        - actionType
+      properties:
+        key:
+          type: string
+        label:
+          type: string
+        actionType:
+          type: string
+          enum: [create, update, skip]
+        desiredValue:
+          type: string
+        desiredContentType:
+          type: string
+        reason:
+          type: string
+    LabelContext:
+      type: object
+      properties:
+        environmentLabel:
+          type: string
+        useEmptyLabelWhenMissing:
+          type: boolean
+    ManagedMetadata:
+      type: object
+      properties:
+        source:
+          type: string
+        timestamp:
+          type: string
+        additionalTags:
+          type: object
+          additionalProperties:
+            type: string
+    RetryPolicy:
+      type: object
+      properties:
+        maxAttempts:
+          type: integer
+        baseDelaySeconds:
+          type: integer
+        maxDelaySeconds:
+          type: integer
+    RollbackOptions:
+      type: object
+      properties:
+        enabled:
+          type: boolean
+        snapshotId:
+          type: string
+    WriteReport:
+      type: object
+      required:
+        - totals
+        - results
+      properties:
+        correlationId:
+          type: string
+        startedAt:
+          type: string
+        completedAt:
+          type: string
+        totals:
+          $ref: '#/components/schemas/WriteTotals'
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/WriteResult'
+    WriteTotals:
+      type: object
+      properties:
+        create:
+          type: integer
+        update:
+          type: integer
+        skip:
+          type: integer
+        failed:
+          type: integer
+    WriteResult:
+      type: object
+      required:
+        - key
+        - label
+        - status
+      properties:
+        key:
+          type: string
+        label:
+          type: string
+        status:
+          type: string
+          enum: [succeeded, skipped, failed, rolledBack]
+        attempts:
+          type: integer
+        retryCount:
+          type: integer
+        failureReason:
+          type: string
+    ValidationError:
+      type: object
+      required:
+        - message
+      properties:
+        message:
+          type: string
+        field:
+          type: string

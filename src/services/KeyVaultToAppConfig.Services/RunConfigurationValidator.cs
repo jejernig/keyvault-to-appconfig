@@ -117,7 +117,8 @@ public sealed class RunConfigurationValidator
             Mode = options.Mode,
             ConfirmCopyValue = options.ConfirmCopyValue,
             Verbosity = ParseVerbosity(options.Verbosity),
-            CorrelationId = options.CorrelationId
+            CorrelationId = options.CorrelationId,
+            FailFast = options.FailFast
         };
     }
 

@@ -32,6 +32,7 @@ public static class Program
         var reportJsonOption = new Option<string?>("--report-json");
         var verbosityOption = new Option<string?>("--verbosity") { DefaultValueFactory = _ => "normal" };
         var correlationIdOption = new Option<string?>("--correlation-id");
+        var failFastOption = new Option<bool>("--fail-fast");
 
         var rootCommand = new RootCommand("Key Vault to App Configuration standardizer");
         rootCommand.Add(keyvaultUriOption);
@@ -55,6 +56,7 @@ public static class Program
         rootCommand.Add(reportJsonOption);
         rootCommand.Add(verbosityOption);
         rootCommand.Add(correlationIdOption);
+        rootCommand.Add(failFastOption);
 
         rootCommand.Add(MappingSpecCommand.Build());
         rootCommand.Add(MappingValidateCommand.Build());
@@ -89,7 +91,8 @@ public static class Program
                 ContinuationToken = parseResult.GetValue(continuationTokenOption),
                 ReportJson = parseResult.GetValue(reportJsonOption),
                 Verbosity = parseResult.GetValue(verbosityOption),
-                CorrelationId = parseResult.GetValue(correlationIdOption)
+                CorrelationId = parseResult.GetValue(correlationIdOption),
+                FailFast = parseResult.GetValue(failFastOption)
             };
 
             return await RunAsync(options, cancellationToken);
@@ -124,7 +127,8 @@ public static class Program
             ContinuationToken = options.ContinuationToken,
             ReportJson = options.ReportJson,
             Verbosity = options.Verbosity,
-            CorrelationId = options.CorrelationId
+            CorrelationId = options.CorrelationId,
+            FailFast = options.FailFast
         };
 
         var validation = validator.Validate(input);
@@ -163,6 +167,6 @@ public static class Program
                 cancellationToken);
         }
 
-        return ObservabilityExitCodes.MapFromFailures(report.Totals.Failed);
+        return report.ExitCode;
     }
 }

@@ -58,3 +58,7 @@ dotnet run -- \
   --apply \
   --mode kvref
 ```
+
+## Testing & Quality Gates
+
+See `docs/testing.md` for required test suites, CI gate rules, and release validation expectations.

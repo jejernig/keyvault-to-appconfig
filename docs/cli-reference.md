@@ -29,6 +29,12 @@ Provide required and optional CLI arguments with defaults and examples.
 | --verbosity | No | normal | Console output level (minimal, normal, verbose). |
 | --correlation-id | No | (generated) | Correlation identifier for logs and reports. |
 | --fail-fast | No | false | Stop after the first recoverable error. |
+| --disable-managed-identity | No | false | Disable Managed Identity credential source. |
+| --disable-workload-identity | No | false | Disable Workload Identity credential source. |
+| --disable-azure-cli | No | false | Disable Azure CLI credential source. |
+| --disable-visual-studio | No | false | Disable Visual Studio credential source. |
+| --disable-visual-studio-code | No | false | Disable Visual Studio Code credential source. |
+| --disable-shared-token-cache | No | false | Disable shared token cache credential source. |
 
 ## Exit Codes
 

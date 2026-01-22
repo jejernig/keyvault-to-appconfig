@@ -33,6 +33,12 @@ public static class Program
         var verbosityOption = new Option<string?>("--verbosity") { DefaultValueFactory = _ => "normal" };
         var correlationIdOption = new Option<string?>("--correlation-id");
         var failFastOption = new Option<bool>("--fail-fast");
+        var disableManagedIdentityOption = new Option<bool>("--disable-managed-identity");
+        var disableWorkloadIdentityOption = new Option<bool>("--disable-workload-identity");
+        var disableAzureCliOption = new Option<bool>("--disable-azure-cli");
+        var disableVisualStudioOption = new Option<bool>("--disable-visual-studio");
+        var disableVisualStudioCodeOption = new Option<bool>("--disable-visual-studio-code");
+        var disableSharedTokenCacheOption = new Option<bool>("--disable-shared-token-cache");
 
         var rootCommand = new RootCommand("Key Vault to App Configuration standardizer");
         rootCommand.Add(keyvaultUriOption);
@@ -57,6 +63,12 @@ public static class Program
         rootCommand.Add(verbosityOption);
         rootCommand.Add(correlationIdOption);
         rootCommand.Add(failFastOption);
+        rootCommand.Add(disableManagedIdentityOption);
+        rootCommand.Add(disableWorkloadIdentityOption);
+        rootCommand.Add(disableAzureCliOption);
+        rootCommand.Add(disableVisualStudioOption);
+        rootCommand.Add(disableVisualStudioCodeOption);
+        rootCommand.Add(disableSharedTokenCacheOption);
 
         rootCommand.Add(MappingSpecCommand.Build());
         rootCommand.Add(MappingValidateCommand.Build());
@@ -92,7 +104,13 @@ public static class Program
                 ReportJson = parseResult.GetValue(reportJsonOption),
                 Verbosity = parseResult.GetValue(verbosityOption),
                 CorrelationId = parseResult.GetValue(correlationIdOption),
-                FailFast = parseResult.GetValue(failFastOption)
+                FailFast = parseResult.GetValue(failFastOption),
+                DisableManagedIdentity = parseResult.GetValue(disableManagedIdentityOption),
+                DisableWorkloadIdentity = parseResult.GetValue(disableWorkloadIdentityOption),
+                DisableAzureCli = parseResult.GetValue(disableAzureCliOption),
+                DisableVisualStudio = parseResult.GetValue(disableVisualStudioOption),
+                DisableVisualStudioCode = parseResult.GetValue(disableVisualStudioCodeOption),
+                DisableSharedTokenCache = parseResult.GetValue(disableSharedTokenCacheOption)
             };
 
             return await RunAsync(options, cancellationToken);
@@ -128,7 +146,13 @@ public static class Program
             ReportJson = options.ReportJson,
             Verbosity = options.Verbosity,
             CorrelationId = options.CorrelationId,
-            FailFast = options.FailFast
+            FailFast = options.FailFast,
+            DisableManagedIdentity = options.DisableManagedIdentity,
+            DisableWorkloadIdentity = options.DisableWorkloadIdentity,
+            DisableAzureCli = options.DisableAzureCli,
+            DisableVisualStudio = options.DisableVisualStudio,
+            DisableVisualStudioCode = options.DisableVisualStudioCode,
+            DisableSharedTokenCache = options.DisableSharedTokenCache
         };
 
         var validation = validator.Validate(input);

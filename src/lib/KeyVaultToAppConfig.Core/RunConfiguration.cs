@@ -22,4 +22,10 @@ public sealed class RunConfiguration
     public Observability.VerbosityLevel Verbosity { get; init; } = Observability.VerbosityLevel.Normal;
     public string? CorrelationId { get; init; }
     public bool FailFast { get; init; }
+    public bool DisableManagedIdentity { get; init; }
+    public bool DisableWorkloadIdentity { get; init; }
+    public bool DisableAzureCli { get; init; }
+    public bool DisableVisualStudio { get; init; }
+    public bool DisableVisualStudioCode { get; init; }
+    public bool DisableSharedTokenCache { get; init; }
 }

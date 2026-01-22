@@ -2,11 +2,27 @@ namespace KeyVaultToAppConfig.Core.Auth;
 
 public sealed class CredentialResolutionPolicy
 {
-    public IReadOnlyList<CredentialSource> OrderedSources { get; init; }
-        = new List<CredentialSource>
+    public CredentialResolutionPolicy(RunConfiguration config)
+    {
+        var sources = new List<CredentialSource>();
+
+        if (!config.DisableManagedIdentity)
         {
-            CredentialSource.ManagedIdentity,
-            CredentialSource.WorkloadIdentity,
-            CredentialSource.LocalDeveloper
-        };
+            sources.Add(CredentialSource.ManagedIdentity);
+        }
+
+        if (!config.DisableWorkloadIdentity)
+        {
+            sources.Add(CredentialSource.WorkloadIdentity);
+        }
+
+        if (!(config.DisableAzureCli && config.DisableVisualStudio && config.DisableVisualStudioCode))
+        {
+            sources.Add(CredentialSource.LocalDeveloper);
+        }
+
+        OrderedSources = sources;
+    }
+
+    public IReadOnlyList<CredentialSource> OrderedSources { get; }
 }

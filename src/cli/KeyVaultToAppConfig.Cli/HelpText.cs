@@ -29,5 +29,11 @@ Options:
   --page-size <n>
   --continuation-token <token>
   --report-json <path>
+  --disable-managed-identity
+  --disable-workload-identity
+  --disable-azure-cli
+  --disable-visual-studio
+  --disable-visual-studio-code
+  --disable-shared-token-cache
 """;
 }

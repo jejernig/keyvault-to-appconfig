@@ -6,6 +6,7 @@ public sealed class AuthResult
     public CredentialSource? SelectedSource { get; init; }
     public AuthErrorCategory ErrorCategory { get; init; } = AuthErrorCategory.None;
     public string ErrorMessage { get; init; } = string.Empty;
+    public string ErrorDetail { get; init; } = string.Empty;
     public int RetryCount { get; init; }
 }
 

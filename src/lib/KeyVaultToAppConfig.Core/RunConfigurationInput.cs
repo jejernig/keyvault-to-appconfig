@@ -24,4 +24,10 @@ public sealed class RunConfigurationInput
     public string? Verbosity { get; set; }
     public string? CorrelationId { get; set; }
     public bool FailFast { get; set; }
+    public bool DisableManagedIdentity { get; set; }
+    public bool DisableWorkloadIdentity { get; set; }
+    public bool DisableAzureCli { get; set; }
+    public bool DisableVisualStudio { get; set; }
+    public bool DisableVisualStudioCode { get; set; }
+    public bool DisableSharedTokenCache { get; set; }
 }

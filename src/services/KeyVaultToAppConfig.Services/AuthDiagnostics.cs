@@ -1,4 +1,5 @@
 using System.Text.RegularExpressions;
+using Azure;
 using Azure.Identity;
 using KeyVaultToAppConfig.Core.Auth;
 
@@ -43,5 +44,22 @@ public sealed class AuthDiagnostics
         }
 
         return AuthErrorCategory.Transient;
+    }
+
+    public string FormatException(Exception exception)
+    {
+        var message = exception.Message;
+        if (SecretPattern.IsMatch(message))
+        {
+            message = SecretPattern.Replace(message, "redacted=");
+        }
+
+        if (exception is AuthenticationFailedException authException
+            && authException.InnerException is RequestFailedException requestFailed)
+        {
+            return $"{exception.GetType().Name}: {message} (Status: {requestFailed.Status}, Code: {requestFailed.ErrorCode})";
+        }
+
+        return $"{exception.GetType().Name}: {message}";
     }
 }

@@ -1,3 +1,5 @@
+using Azure;
+using Azure.Core;
 using Azure.Identity;
 using Azure.Security.KeyVault.Secrets;
 using KeyVaultToAppConfig.Core;
@@ -72,7 +74,7 @@ public sealed class ExecutionService
             return report;
         }
 
-        var resolver = new AuthResolver(diagnostics);
+        var resolver = new AuthResolver(diagnostics, config);
         var authResult = await resolver.ResolveAsync(new[]
         {
             "https://vault.azure.net/.default",
@@ -81,16 +83,31 @@ public sealed class ExecutionService
 
         if (!authResult.IsSuccess)
         {
-            Log(logWriter, correlationId, "run-failed", "error", "Authentication failed.", new Dictionary<string, string>
+            var errorData = new Dictionary<string, string>
             {
                 ["errorType"] = authResult.ErrorCategory.ToString().ToLowerInvariant()
-            });
+            };
+
+            if (!string.IsNullOrWhiteSpace(authResult.ErrorDetail))
+            {
+                errorData["detail"] = authResult.ErrorDetail;
+            }
+
+            Log(logWriter, correlationId, "run-failed", "error", "Authentication failed.", errorData);
 
             var errorRecord = CreateErrorRecord(
-                classifier.Classify("run", new InvalidOperationException(authResult.ErrorMessage)),
+                classifier.Classify("run", new InvalidOperationException(authResult.ErrorDetail)),
                 "run",
                 "auth",
-                "Authentication failed.");
+                string.IsNullOrWhiteSpace(authResult.ErrorDetail)
+                    ? "Authentication failed."
+                    : authResult.ErrorDetail);
+
+            var failureMessage = authResult.ErrorMessage;
+            if (!string.IsNullOrWhiteSpace(authResult.ErrorDetail))
+            {
+                failureMessage = $"{failureMessage} {authResult.ErrorDetail}";
+            }
 
             var report = new RunReport
             {
@@ -107,7 +124,7 @@ public sealed class ExecutionService
                     {
                         Key = "auth",
                         ErrorType = authResult.ErrorCategory.ToString().ToLowerInvariant(),
-                        Message = authResult.ErrorMessage
+                        Message = failureMessage
                     }
                 },
                 Errors = { errorRecord }
@@ -118,7 +135,7 @@ public sealed class ExecutionService
 
         try
         {
-            var credential = new DefaultAzureCredential();
+            var credential = CreateTokenCredential(config);
             var secretClient = new SecretClient(new Uri(config.KeyVaultUri), credential);
             var enumerator = new KeyVaultSecretEnumerator(secretClient);
             var filter = EnumerationFilterBuilder.Build(config);
@@ -187,6 +204,7 @@ public sealed class ExecutionService
         }
         catch (Exception ex)
         {
+            var detail = FormatExceptionSummary(ex);
             Log(logWriter, correlationId, "run-failed", "error", "Run failed with exception.", new Dictionary<string, string>
             {
                 ["errorType"] = "fatal"
@@ -196,7 +214,7 @@ public sealed class ExecutionService
                 classifier.Classify("run", ex),
                 "run",
                 "enumeration",
-                ex.Message);
+                detail);
 
             return new RunReport
             {
@@ -213,7 +231,7 @@ public sealed class ExecutionService
                     {
                         Key = "enumeration",
                         ErrorType = "fatal",
-                        Message = ex.Message
+                        Message = detail
                     }
                 },
                 Errors = { errorRecord }
@@ -299,7 +317,42 @@ public sealed class ExecutionService
         }
 
         throw new InvalidOperationException(
-            $"Enumeration failed after {attempts} attempts.",
+            $"Enumeration failed after {attempts} attempts. {FormatExceptionSummary(lastException)}",
             lastException);
+    }
+
+    private static TokenCredential CreateTokenCredential(RunConfiguration config)
+    {
+        var options = new DefaultAzureCredentialOptions
+        {
+            ExcludeManagedIdentityCredential = config.DisableManagedIdentity,
+            ExcludeWorkloadIdentityCredential = config.DisableWorkloadIdentity,
+            ExcludeAzureCliCredential = config.DisableAzureCli,
+            ExcludeVisualStudioCredential = config.DisableVisualStudio,
+            ExcludeVisualStudioCodeCredential = config.DisableVisualStudioCode,
+            ExcludeSharedTokenCacheCredential = config.DisableSharedTokenCache
+        };
+
+        return new DefaultAzureCredential(options);
+    }
+
+    private static string FormatExceptionSummary(Exception? exception)
+    {
+        if (exception is null)
+        {
+            return "No additional error detail available.";
+        }
+
+        if (exception is RequestFailedException requestFailed)
+        {
+            return $"{requestFailed.GetType().Name}: {requestFailed.Message} (Status: {requestFailed.Status}, Code: {requestFailed.ErrorCode})";
+        }
+
+        if (exception.InnerException is RequestFailedException innerRequestFailed)
+        {
+            return $"{exception.GetType().Name}: {exception.Message} | Inner: {innerRequestFailed.GetType().Name}: {innerRequestFailed.Message} (Status: {innerRequestFailed.Status}, Code: {innerRequestFailed.ErrorCode})";
+        }
+
+        return $"{exception.GetType().Name}: {exception.Message}";
     }
 }

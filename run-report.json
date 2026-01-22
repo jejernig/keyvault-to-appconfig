@@ -1,0 +1,154 @@
+{
+  "correlationId": "1b35afd142f541209d780bf52c7581a6",
+  "runMode": "apply",
+  "verbosity": "normal",
+  "runOutcome": "success",
+  "exitCode": 0,
+  "totals": {
+    "total": 26,
+    "changes": 0,
+    "skips": 0,
+    "failures": 0
+  },
+  "errorTotals": {
+    "successfulSecrets": 26,
+    "recoverableFailures": 0,
+    "unprocessedSecrets": 0
+  },
+  "items": [],
+  "secretOutcomes": [
+    {
+      "key": "barryequipment-imp-IntacctRestApiClientId",
+      "status": "success",
+      "errorId": null
+    },
+    {
+      "key": "barryequipment-imp-IntacctRestApiClientSecret",
+      "status": "success",
+      "errorId": null
+    },
+    {
+      "key": "barryequipment-imp-SenderId",
+      "status": "success",
+      "errorId": null
+    },
+    {
+      "key": "barryequipment-imp-SenderPassword",
+      "status": "success",
+      "errorId": null
+    },
+    {
+      "key": "barryequipment-IntacctRestApiClientId",
+      "status": "success",
+      "errorId": null
+    },
+    {
+      "key": "barryequipment-IntacctRestApiClientSecret",
+      "status": "success",
+      "errorId": null
+    },
+    {
+      "key": "barryequipment-SenderId",
+      "status": "success",
+      "errorId": null
+    },
+    {
+      "key": "barryequipment-SenderPassword",
+      "status": "success",
+      "errorId": null
+    },
+    {
+      "key": "BT-DEV-CREFoundations-IntacctRestApiClientId",
+      "status": "success",
+      "errorId": null
+    },
+    {
+      "key": "BT-DEV-CREFoundations-IntacctRestApiClientSecret",
+      "status": "success",
+      "errorId": null
+    },
+    {
+      "key": "BT-DEV-CREFoundations-SenderId",
+      "status": "success",
+      "errorId": null
+    },
+    {
+      "key": "BT-DEV-CREFoundations-SenderPassword",
+      "status": "success",
+      "errorId": null
+    },
+    {
+      "key": "CraigTaylor-imp-IntacctRestApiClientId",
+      "status": "success",
+      "errorId": null
+    },
+    {
+      "key": "CraigTaylor-imp-IntacctRestApiClientSecret",
+      "status": "success",
+      "errorId": null
+    },
+    {
+      "key": "CraigTaylor-imp-SenderId",
+      "status": "success",
+      "errorId": null
+    },
+    {
+      "key": "CraigTaylor-imp-SenderPassword",
+      "status": "success",
+      "errorId": null
+    },
+    {
+      "key": "CraigTaylor-IntacctRestApiClientId",
+      "status": "success",
+      "errorId": null
+    },
+    {
+      "key": "CraigTaylor-IntacctRestApiClientSecret",
+      "status": "success",
+      "errorId": null
+    },
+    {
+      "key": "CraigTaylor-SenderId",
+      "status": "success",
+      "errorId": null
+    },
+    {
+      "key": "CraigTaylor-SenderPassword",
+      "status": "success",
+      "errorId": null
+    },
+    {
+      "key": "Sockeye-DEV-FOUNDATIONS-IntacctRestApiClientId",
+      "status": "success",
+      "errorId": null
+    },
+    {
+      "key": "Sockeye-DEV-FOUNDATIONS-IntacctRestApiClientSecret",
+      "status": "success",
+      "errorId": null
+    },
+    {
+      "key": "Sockeye-DEV-FOUNDATIONS-SenderId",
+      "status": "success",
+      "errorId": null
+    },
+    {
+      "key": "Sockeye-DEV-FOUNDATIONS-SenderPassword",
+      "status": "success",
+      "errorId": null
+    },
+    {
+      "key": "Sockeye-DEV-IntacctRestApiClientId",
+      "status": "success",
+      "errorId": null
+    },
+    {
+      "key": "Sockeye-DEV-IntacctRestApiClientSecret",
+      "status": "success",
+      "errorId": null
+    }
+  ],
+  "failures": [],
+  "errors": [],
+  "generatedAt": "2026-01-22T16:12:19.5569843+00:00"
+}

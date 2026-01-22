@@ -118,7 +118,13 @@ public sealed class RunConfigurationValidator
             ConfirmCopyValue = options.ConfirmCopyValue,
             Verbosity = ParseVerbosity(options.Verbosity),
             CorrelationId = options.CorrelationId,
-            FailFast = options.FailFast
+            FailFast = options.FailFast,
+            DisableManagedIdentity = options.DisableManagedIdentity,
+            DisableWorkloadIdentity = options.DisableWorkloadIdentity,
+            DisableAzureCli = options.DisableAzureCli,
+            DisableVisualStudio = options.DisableVisualStudio,
+            DisableVisualStudioCode = options.DisableVisualStudioCode,
+            DisableSharedTokenCache = options.DisableSharedTokenCache
         };
     }
 

@@ -67,9 +67,13 @@ public sealed class MappingEngine : IMappingEngine
                     case CollisionPolicy.Error:
                         run.Status = MappingRunStatus.Failed;
                         break;
+                    case CollisionPolicy.KeepFirst:
+                        break;
                     case CollisionPolicy.KeepLast:
                         output[normalizedKey] = sourceKey;
                         sourceByNormalized[normalizedKey] = sourceKey;
+                        break;
+                    case CollisionPolicy.ReportOnly:
                         break;
                 }
 

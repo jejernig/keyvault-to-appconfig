@@ -9,6 +9,8 @@ public sealed class RunConfigurationInput
     public bool Apply { get; set; }
     public string Mode { get; set; } = "kvref";
     public bool ConfirmCopyValue { get; set; }
+    public bool Prune { get; set; }
+    public bool ConfirmPrune { get; set; }
     public string? Environment { get; set; }
     public string? MappingFile { get; set; }
     public int? Parallelism { get; set; }

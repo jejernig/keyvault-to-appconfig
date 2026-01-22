@@ -18,6 +18,8 @@ public static class Program
         var applyOption = new Option<bool>("--apply");
         var modeOption = new Option<string>("--mode") { DefaultValueFactory = _ => "kvref" };
         var confirmCopyValueOption = new Option<bool>("--confirm-copy-value");
+        var pruneOption = new Option<bool>("--prune");
+        var confirmPruneOption = new Option<bool>("--confirm-prune");
         var environmentOption = new Option<string?>("--environment");
         var mappingFileOption = new Option<string?>("--mapping-file");
         var parallelismOption = new Option<int?>("--parallelism");
@@ -48,6 +50,8 @@ public static class Program
         rootCommand.Add(applyOption);
         rootCommand.Add(modeOption);
         rootCommand.Add(confirmCopyValueOption);
+        rootCommand.Add(pruneOption);
+        rootCommand.Add(confirmPruneOption);
         rootCommand.Add(environmentOption);
         rootCommand.Add(mappingFileOption);
         rootCommand.Add(parallelismOption);
@@ -90,6 +94,8 @@ public static class Program
                 Apply = parseResult.GetValue(applyOption),
                 Mode = parseResult.GetValue(modeOption) ?? "kvref",
                 ConfirmCopyValue = parseResult.GetValue(confirmCopyValueOption),
+                Prune = parseResult.GetValue(pruneOption),
+                ConfirmPrune = parseResult.GetValue(confirmPruneOption),
                 Environment = parseResult.GetValue(environmentOption),
                 MappingFile = parseResult.GetValue(mappingFileOption),
                 Parallelism = parseResult.GetValue(parallelismOption),
@@ -132,6 +138,8 @@ public static class Program
             Apply = options.Apply,
             Mode = options.Mode,
             ConfirmCopyValue = options.ConfirmCopyValue,
+            Prune = options.Prune,
+            ConfirmPrune = options.ConfirmPrune,
             Environment = options.Environment,
             MappingFile = options.MappingFile,
             Parallelism = options.Parallelism,

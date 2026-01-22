@@ -33,6 +33,11 @@ public sealed class RunConfigurationValidator
             result.Errors.Add("--mode copyvalue requires --confirm-copy-value.");
         }
 
+        if (options.Prune && !options.ConfirmPrune)
+        {
+            result.Errors.Add("--prune requires --confirm-prune.");
+        }
+
         if (options.Parallelism is not null && options.Parallelism < 1)
         {
             result.Errors.Add("--parallelism must be >= 1 when provided.");
@@ -116,6 +121,8 @@ public sealed class RunConfigurationValidator
             ReportJson = options.ReportJson,
             Mode = options.Mode,
             ConfirmCopyValue = options.ConfirmCopyValue,
+            Prune = options.Prune,
+            ConfirmPrune = options.ConfirmPrune,
             Verbosity = ParseVerbosity(options.Verbosity),
             CorrelationId = options.CorrelationId,
             FailFast = options.FailFast,

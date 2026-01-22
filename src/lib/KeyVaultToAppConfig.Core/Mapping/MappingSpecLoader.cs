@@ -70,9 +70,15 @@ public sealed class MappingSpecLoader
             if (reader.TokenType == JsonTokenType.String)
             {
                 var value = reader.GetString();
-                if (!string.IsNullOrWhiteSpace(value) && Enum.TryParse(value, true, out T result))
+                if (!string.IsNullOrWhiteSpace(value))
                 {
-                    return result;
+                    var normalized = value.Replace("-", string.Empty, StringComparison.Ordinal)
+                        .Replace("_", string.Empty, StringComparison.Ordinal)
+                        .Replace(" ", string.Empty, StringComparison.Ordinal);
+                    if (Enum.TryParse(normalized, true, out T result))
+                    {
+                        return result;
+                    }
                 }
 
                 return default;

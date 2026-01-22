@@ -17,6 +17,8 @@ Execution:
 Options:
   --mode <kvref|copyvalue>      Secret handling mode (default: kvref)
   --confirm-copy-value          Required when --mode copyvalue
+  --prune                       Delete existing keys not in desired state
+  --confirm-prune               Required when --prune
   --environment <label>
   --mapping-file <path>
   --parallelism <n>

@@ -1,12 +1,12 @@
 {
-  "correlationId": "1b35afd142f541209d780bf52c7581a6",
+  "correlationId": "51622642893248e69838c19c84446ef6",
   "runMode": "apply",
   "verbosity": "normal",
   "runOutcome": "success",
   "exitCode": 0,
   "totals": {
     "total": 26,
-    "changes": 0,
+    "changes": 48,
     "skips": 0,
     "failures": 0
   },
@@ -15,7 +15,344 @@
     "recoverableFailures": 0,
     "unprocessedSecrets": 0
   },
-  "items": [],
+  "items": [
+    {
+      "key": "/crefoundations/barryequipment/overrides/imp/clientid",
+      "label": null,
+      "outcome": "changed",
+      "reason": "Missing in existing state",
+      "timestamp": "2026-01-22T21:05:57.3052931+00:00"
+    },
+    {
+      "key": "/crefoundations/barryequipment/overrides/imp/clientsecret",
+      "label": null,
+      "outcome": "changed",
+      "reason": "Missing in existing state",
+      "timestamp": "2026-01-22T21:05:57.3052931+00:00"
+    },
+    {
+      "key": "/crefoundations/barryequipment/overrides/imp/senderid",
+      "label": null,
+      "outcome": "changed",
+      "reason": "Missing in existing state",
+      "timestamp": "2026-01-22T21:05:57.3052931+00:00"
+    },
+    {
+      "key": "/crefoundations/barryequipment/overrides/imp/senderpassword",
+      "label": null,
+      "outcome": "changed",
+      "reason": "Missing in existing state",
+      "timestamp": "2026-01-22T21:05:57.3052931+00:00"
+    },
+    {
+      "key": "/crefoundations/barryequipment/senderid",
+      "label": null,
+      "outcome": "changed",
+      "reason": "Missing in existing state",
+      "timestamp": "2026-01-22T21:05:57.3052931+00:00"
+    },
+    {
+      "key": "/crefoundations/barryequipment/senderpassword",
+      "label": null,
+      "outcome": "changed",
+      "reason": "Missing in existing state",
+      "timestamp": "2026-01-22T21:05:57.3052931+00:00"
+    },
+    {
+      "key": "/crefoundations/BT-DEV-CREFoundations/senderid",
+      "label": null,
+      "outcome": "changed",
+      "reason": "Missing in existing state",
+      "timestamp": "2026-01-22T21:05:57.3052931+00:00"
+    },
+    {
+      "key": "/crefoundations/BT-DEV-CREFoundations/senderpassword",
+      "label": null,
+      "outcome": "changed",
+      "reason": "Missing in existing state",
+      "timestamp": "2026-01-22T21:05:57.3052931+00:00"
+    },
+    {
+      "key": "/crefoundations/CraigTaylor/overrides/imp/clientid",
+      "label": null,
+      "outcome": "changed",
+      "reason": "Missing in existing state",
+      "timestamp": "2026-01-22T21:05:57.3052931+00:00"
+    },
+    {
+      "key": "/crefoundations/CraigTaylor/overrides/imp/clientsecret",
+      "label": null,
+      "outcome": "changed",
+      "reason": "Missing in existing state",
+      "timestamp": "2026-01-22T21:05:57.3052931+00:00"
+    },
+    {
+      "key": "/crefoundations/CraigTaylor/overrides/imp/senderid",
+      "label": null,
+      "outcome": "changed",
+      "reason": "Missing in existing state",
+      "timestamp": "2026-01-22T21:05:57.3052931+00:00"
+    },
+    {
+      "key": "/crefoundations/CraigTaylor/overrides/imp/senderpassword",
+      "label": null,
+      "outcome": "changed",
+      "reason": "Missing in existing state",
+      "timestamp": "2026-01-22T21:05:57.3052931+00:00"
+    },
+    {
+      "key": "/crefoundations/CraigTaylor/senderid",
+      "label": null,
+      "outcome": "changed",
+      "reason": "Missing in existing state",
+      "timestamp": "2026-01-22T21:05:57.3052931+00:00"
+    },
+    {
+      "key": "/crefoundations/CraigTaylor/senderpassword",
+      "label": null,
+      "outcome": "changed",
+      "reason": "Missing in existing state",
+      "timestamp": "2026-01-22T21:05:57.3052931+00:00"
+    },
+    {
+      "key": "/crefoundations/shared/clientid",
+      "label": null,
+      "outcome": "changed",
+      "reason": "Missing in existing state",
+      "timestamp": "2026-01-22T21:05:57.3052931+00:00"
+    },
+    {
+      "key": "/crefoundations/shared/clientsecret",
+      "label": null,
+      "outcome": "changed",
+      "reason": "Missing in existing state",
+      "timestamp": "2026-01-22T21:05:57.3052931+00:00"
+    },
+    {
+      "key": "/crefoundations/Sockeye-DEV-FOUNDATIONS/senderid",
+      "label": null,
+      "outcome": "changed",
+      "reason": "Missing in existing state",
+      "timestamp": "2026-01-22T21:05:57.3052931+00:00"
+    },
+    {
+      "key": "/crefoundations/Sockeye-DEV-FOUNDATIONS/senderpassword",
+      "label": null,
+      "outcome": "changed",
+      "reason": "Missing in existing state",
+      "timestamp": "2026-01-22T21:05:57.3052931+00:00"
+    },
+    {
+      "key": "/product/crefoundations/clients/barryequipment/overrides/imp/rest/clientid",
+      "label": null,
+      "outcome": "changed",
+      "reason": "Pruned (not in desired state)",
+      "timestamp": "2026-01-22T21:05:57.3052931+00:00"
+    },
+    {
+      "key": "/product/crefoundations/clients/barryequipment/overrides/imp/rest/clientsecret",
+      "label": null,
+      "outcome": "changed",
+      "reason": "Pruned (not in desired state)",
+      "timestamp": "2026-01-22T21:05:57.3052931+00:00"
+    },
+    {
+      "key": "/product/crefoundations/clients/barryequipment/rest/clientid",
+      "label": null,
+      "outcome": "changed",
+      "reason": "Pruned (not in desired state)",
+      "timestamp": "2026-01-22T21:05:57.3052931+00:00"
+    },
+    {
+      "key": "/product/crefoundations/clients/barryequipment/rest/clientsecret",
+      "label": null,
+      "outcome": "changed",
+      "reason": "Pruned (not in desired state)",
+      "timestamp": "2026-01-22T21:05:57.3052931+00:00"
+    },
+    {
+      "key": "/product/crefoundations/clients/BT-DEV-CREFoundations/rest/clientid",
+      "label": null,
+      "outcome": "changed",
+      "reason": "Pruned (not in desired state)",
+      "timestamp": "2026-01-22T21:05:57.3052931+00:00"
+    },
+    {
+      "key": "/product/crefoundations/clients/BT-DEV-CREFoundations/rest/clientsecret",
+      "label": null,
+      "outcome": "changed",
+      "reason": "Pruned (not in desired state)",
+      "timestamp": "2026-01-22T21:05:57.3052931+00:00"
+    },
+    {
+      "key": "/product/crefoundations/clients/CraigTaylor/overrides/imp/rest/clientid",
+      "label": null,
+      "outcome": "changed",
+      "reason": "Pruned (not in desired state)",
+      "timestamp": "2026-01-22T21:05:57.3052931+00:00"
+    },
+    {
+      "key": "/product/crefoundations/clients/CraigTaylor/overrides/imp/rest/clientsecret",
+      "label": null,
+      "outcome": "changed",
+      "reason": "Pruned (not in desired state)",
+      "timestamp": "2026-01-22T21:05:57.3052931+00:00"
+    },
+    {
+      "key": "/product/crefoundations/clients/CraigTaylor/rest/clientid",
+      "label": null,
+      "outcome": "changed",
+      "reason": "Pruned (not in desired state)",
+      "timestamp": "2026-01-22T21:05:57.3052931+00:00"
+    },
+    {
+      "key": "/product/crefoundations/clients/CraigTaylor/rest/clientsecret",
+      "label": null,
+      "outcome": "changed",
+      "reason": "Pruned (not in desired state)",
+      "timestamp": "2026-01-22T21:05:57.3052931+00:00"
+    },
+    {
+      "key": "/product/crefoundations/clients/Sockeye-DEV-FOUNDATIONS/rest/clientid",
+      "label": null,
+      "outcome": "changed",
+      "reason": "Pruned (not in desired state)",
+      "timestamp": "2026-01-22T21:05:57.3052931+00:00"
+    },
+    {
+      "key": "/product/crefoundations/clients/Sockeye-DEV-FOUNDATIONS/rest/clientsecret",
+      "label": null,
+      "outcome": "changed",
+      "reason": "Pruned (not in desired state)",
+      "timestamp": "2026-01-22T21:05:57.3052931+00:00"
+    },
+    {
+      "key": "/product/crefoundations/clients/Sockeye-DEV/rest/clientid",
+      "label": null,
+      "outcome": "changed",
+      "reason": "Pruned (not in desired state)",
+      "timestamp": "2026-01-22T21:05:57.3052931+00:00"
+    },
+    {
+      "key": "/product/crefoundations/clients/Sockeye-DEV/rest/clientsecret",
+      "label": null,
+      "outcome": "changed",
+      "reason": "Pruned (not in desired state)",
+      "timestamp": "2026-01-22T21:05:57.3052931+00:00"
+    },
+    {
+      "key": "/product/crefoundations/default/rest/clientid",
+      "label": null,
+      "outcome": "changed",
+      "reason": "Pruned (not in desired state)",
+      "timestamp": "2026-01-22T21:05:57.3052931+00:00"
+    },
+    {
+      "key": "/product/crefoundations/default/rest/clientsecret",
+      "label": null,
+      "outcome": "changed",
+      "reason": "Pruned (not in desired state)",
+      "timestamp": "2026-01-22T21:05:57.3052931+00:00"
+    },
+    {
+      "key": "/product/shared/rest/clientid",
+      "label": null,
+      "outcome": "changed",
+      "reason": "Pruned (not in desired state)",
+      "timestamp": "2026-01-22T21:05:57.3052931+00:00"
+    },
+    {
+      "key": "/product/shared/rest/clientsecret",
+      "label": null,
+      "outcome": "changed",
+      "reason": "Pruned (not in desired state)",
+      "timestamp": "2026-01-22T21:05:57.3052931+00:00"
+    },
+    {
+      "key": "/shared/xml/clients/barryequipment/overrides/imp/senderid",
+      "label": null,
+      "outcome": "changed",
+      "reason": "Pruned (not in desired state)",
+      "timestamp": "2026-01-22T21:05:57.3052931+00:00"
+    },
+    {
+      "key": "/shared/xml/clients/barryequipment/overrides/imp/senderpassword",
+      "label": null,
+      "outcome": "changed",
+      "reason": "Pruned (not in desired state)",
+      "timestamp": "2026-01-22T21:05:57.3052931+00:00"
+    },
+    {
+      "key": "/shared/xml/clients/barryequipment/senderid",
+      "label": null,
+      "outcome": "changed",
+      "reason": "Pruned (not in desired state)",
+      "timestamp": "2026-01-22T21:05:57.3052931+00:00"
+    },
+    {
+      "key": "/shared/xml/clients/barryequipment/senderpassword",
+      "label": null,
+      "outcome": "changed",
+      "reason": "Pruned (not in desired state)",
+      "timestamp": "2026-01-22T21:05:57.3052931+00:00"
+    },
+    {
+      "key": "/shared/xml/clients/BT-DEV-CREFoundations/senderid",
+      "label": null,
+      "outcome": "changed",
+      "reason": "Pruned (not in desired state)",
+      "timestamp": "2026-01-22T21:05:57.3052931+00:00"
+    },
+    {
+      "key": "/shared/xml/clients/BT-DEV-CREFoundations/senderpassword",
+      "label": null,
+      "outcome": "changed",
+      "reason": "Pruned (not in desired state)",
+      "timestamp": "2026-01-22T21:05:57.3052931+00:00"
+    },
+    {
+      "key": "/shared/xml/clients/CraigTaylor/overrides/imp/senderid",
+      "label": null,
+      "outcome": "changed",
+      "reason": "Pruned (not in desired state)",
+      "timestamp": "2026-01-22T21:05:57.3052931+00:00"
+    },
+    {
+      "key": "/shared/xml/clients/CraigTaylor/overrides/imp/senderpassword",
+      "label": null,
+      "outcome": "changed",
+      "reason": "Pruned (not in desired state)",
+      "timestamp": "2026-01-22T21:05:57.3052931+00:00"
+    },
+    {
+      "key": "/shared/xml/clients/CraigTaylor/senderid",
+      "label": null,
+      "outcome": "changed",
+      "reason": "Pruned (not in desired state)",
+      "timestamp": "2026-01-22T21:05:57.3052931+00:00"
+    },
+    {
+      "key": "/shared/xml/clients/CraigTaylor/senderpassword",
+      "label": null,
+      "outcome": "changed",
+      "reason": "Pruned (not in desired state)",
+      "timestamp": "2026-01-22T21:05:57.3052931+00:00"
+    },
+    {
+      "key": "/shared/xml/clients/Sockeye-DEV-FOUNDATIONS/senderid",
+      "label": null,
+      "outcome": "changed",
+      "reason": "Pruned (not in desired state)",
+      "timestamp": "2026-01-22T21:05:57.3052931+00:00"
+    },
+    {
+      "key": "/shared/xml/clients/Sockeye-DEV-FOUNDATIONS/senderpassword",
+      "label": null,
+      "outcome": "changed",
+      "reason": "Pruned (not in desired state)",
+      "timestamp": "2026-01-22T21:05:57.3052931+00:00"
+    }
+  ],
   "secretOutcomes": [
     {
       "key": "barryequipment-imp-IntacctRestApiClientId",
@@ -150,5 +487,5 @@
   ],
   "failures": [],
   "errors": [],
-  "generatedAt": "2026-01-22T16:12:19.5569843+00:00"
+  "generatedAt": "2026-01-22T21:05:57.3136966+00:00"
 }

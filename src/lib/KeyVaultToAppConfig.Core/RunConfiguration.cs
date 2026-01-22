@@ -19,6 +19,8 @@ public sealed class RunConfiguration
     public string? ReportJson { get; init; }
     public string Mode { get; init; } = "kvref";
     public bool ConfirmCopyValue { get; init; }
+    public bool Prune { get; init; }
+    public bool ConfirmPrune { get; init; }
     public Observability.VerbosityLevel Verbosity { get; init; } = Observability.VerbosityLevel.Normal;
     public string? CorrelationId { get; init; }
     public bool FailFast { get; init; }

@@ -8,6 +8,9 @@ obj/
 # Proprietary artifacts
 mappings/
 run-report.json
+_kv-keys.txt
+_last-run-keys.txt
+*.report.json
 
 # User-specific files
 *.user
@@ -24,3 +27,6 @@ Thumbs.db
 .vscode/
 .idea/
 .vs/
+TestResults/
+*.trx
+.env*

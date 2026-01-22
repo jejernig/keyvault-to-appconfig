@@ -5,6 +5,10 @@ obj/
 # Mapping spec storage
 .mapping-specs/
 
+# Proprietary artifacts
+mappings/
+run-report.json
+
 # User-specific files
 *.user
 *.suo

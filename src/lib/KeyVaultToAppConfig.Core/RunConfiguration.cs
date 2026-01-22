@@ -21,4 +21,5 @@ public sealed class RunConfiguration
     public bool ConfirmCopyValue { get; init; }
     public Observability.VerbosityLevel Verbosity { get; init; } = Observability.VerbosityLevel.Normal;
     public string? CorrelationId { get; init; }
+    public bool FailFast { get; init; }
 }

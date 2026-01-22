@@ -2,8 +2,11 @@ using Azure.Identity;
 using Azure.Security.KeyVault.Secrets;
 using KeyVaultToAppConfig.Core;
 using KeyVaultToAppConfig.Core.Auth;
+using KeyVaultToAppConfig.Core.Errors;
 using KeyVaultToAppConfig.Core.Enumeration;
 using KeyVaultToAppConfig.Core.Observability;
+using KeyVaultToAppConfig.Core.Writes;
+using KeyVaultToAppConfig.Services.Errors;
 using KeyVaultToAppConfig.Services.Observability;
 
 namespace KeyVaultToAppConfig.Services;
@@ -15,6 +18,7 @@ public sealed class ExecutionService
         var correlationProvider = new CorrelationIdProvider();
         var correlationId = correlationProvider.GetOrCreate(config.CorrelationId);
         var logWriter = new StructuredLogWriter();
+        var classifier = new ErrorClassifier();
         Log(logWriter, correlationId, "run-start", "info", "Run started.", new Dictionary<string, string>
         {
             ["mode"] = config.ExecutionMode.ToString().ToLowerInvariant()
@@ -38,12 +42,21 @@ public sealed class ExecutionService
                 ["errorType"] = "static-secret"
             });
 
-            return new RunReport
+            var errorRecord = CreateErrorRecord(
+                classifier.Classify("run", new InvalidOperationException("validation")),
+                "run",
+                "validation",
+                "Validation failed.");
+
+            var report = new RunReport
             {
                 RunId = correlationId,
                 ExecutionMode = config.ExecutionMode,
                 Timestamp = DateTimeOffset.UtcNow,
+                Outcome = RunOutcome.FatalFailure,
+                ExitCode = ObservabilityExitCodes.MapFromOutcome(RunOutcome.FatalFailure),
                 Totals = new Totals { Failed = 1 },
+                ErrorTotals = new ErrorTotals(),
                 Failures =
                 {
                     new FailureSummary
@@ -52,8 +65,11 @@ public sealed class ExecutionService
                         ErrorType = "static-secret",
                         Message = violations[0]
                     }
-                }
+                },
+                Errors = { errorRecord }
             };
+
+            return report;
         }
 
         var resolver = new AuthResolver(diagnostics);
@@ -70,12 +86,21 @@ public sealed class ExecutionService
                 ["errorType"] = authResult.ErrorCategory.ToString().ToLowerInvariant()
             });
 
-            return new RunReport
+            var errorRecord = CreateErrorRecord(
+                classifier.Classify("run", new InvalidOperationException(authResult.ErrorMessage)),
+                "run",
+                "auth",
+                "Authentication failed.");
+
+            var report = new RunReport
             {
                 RunId = correlationId,
                 ExecutionMode = config.ExecutionMode,
                 Timestamp = DateTimeOffset.UtcNow,
+                Outcome = RunOutcome.FatalFailure,
+                ExitCode = ObservabilityExitCodes.MapFromOutcome(RunOutcome.FatalFailure),
                 Totals = new Totals { Failed = 1 },
+                ErrorTotals = new ErrorTotals(),
                 Failures =
                 {
                     new FailureSummary
@@ -84,8 +109,11 @@ public sealed class ExecutionService
                         ErrorType = authResult.ErrorCategory.ToString().ToLowerInvariant(),
                         Message = authResult.ErrorMessage
                     }
-                }
+                },
+                Errors = { errorRecord }
             };
+
+            return report;
         }
 
         try
@@ -95,23 +123,66 @@ public sealed class ExecutionService
             var enumerator = new KeyVaultSecretEnumerator(secretClient);
             var filter = EnumerationFilterBuilder.Build(config);
             var versionSelection = VersionSelectionBuilder.Build(config);
-            var secrets = await enumerator.EnumerateAsync(
+            var retryPolicy = new RetryPolicy();
+            var secrets = await EnumerateWithRetryAsync(
+                enumerator,
                 filter,
                 versionSelection,
                 config.PageSize,
                 config.ContinuationToken,
+                retryPolicy,
                 cancellationToken);
+
+            var runner = new SecretOperationRunner(classifier);
+            var operationResult = await runner.ExecuteAsync(
+                secrets,
+                config.FailFast,
+                (_, _) => Task.CompletedTask,
+                cancellationToken);
+
+            var successfulCount = operationResult.Outcomes.Count(o => o.Status == SecretOutcomeStatus.Success);
+            var recoverableCount = operationResult.Outcomes.Count(o => o.Status == SecretOutcomeStatus.RecoverableFailure);
+            var unprocessedCount = operationResult.Outcomes.Count(o => o.Status == SecretOutcomeStatus.Unprocessed);
+            var outcome = operationResult.WasCanceled
+                ? RunOutcome.Canceled
+                : recoverableCount > 0
+                    ? RunOutcome.RecoverableFailures
+                    : RunOutcome.Success;
 
             return new RunReport
             {
                 RunId = correlationId,
                 ExecutionMode = config.ExecutionMode,
                 Timestamp = DateTimeOffset.UtcNow,
+                Outcome = outcome,
+                ExitCode = ObservabilityExitCodes.MapFromOutcome(outcome),
                 Totals = new Totals
                 {
-                    Scanned = secrets.Count
+                    Scanned = secrets.Count,
+                    Failed = recoverableCount
                 },
+                ErrorTotals = new ErrorTotals
+                {
+                    SuccessfulSecrets = successfulCount,
+                    RecoverableFailures = recoverableCount,
+                    UnprocessedSecrets = unprocessedCount
+                },
+                SecretOutcomes = operationResult.Outcomes,
+                Errors = operationResult.Errors,
                 EnumeratedSecrets = secrets.ToList()
+            };
+        }
+        catch (OperationCanceledException)
+        {
+            return new RunReport
+            {
+                RunId = correlationId,
+                ExecutionMode = config.ExecutionMode,
+                Timestamp = DateTimeOffset.UtcNow,
+                Outcome = RunOutcome.Canceled,
+                ExitCode = ObservabilityExitCodes.MapFromOutcome(RunOutcome.Canceled),
+                Totals = new Totals(),
+                ErrorTotals = new ErrorTotals()
             };
         }
         catch (Exception ex)
@@ -121,12 +192,21 @@ public sealed class ExecutionService
                 ["errorType"] = "fatal"
             });
 
+            var errorRecord = CreateErrorRecord(
+                classifier.Classify("run", ex),
+                "run",
+                "enumeration",
+                ex.Message);
+
             return new RunReport
             {
                 RunId = correlationId,
                 ExecutionMode = config.ExecutionMode,
                 Timestamp = DateTimeOffset.UtcNow,
+                Outcome = RunOutcome.FatalFailure,
+                ExitCode = ObservabilityExitCodes.MapFromOutcome(RunOutcome.FatalFailure),
                 Totals = new Totals { Failed = 1 },
+                ErrorTotals = new ErrorTotals(),
                 Failures =
                 {
                     new FailureSummary
@@ -135,7 +215,8 @@ public sealed class ExecutionService
                         ErrorType = "fatal",
                         Message = ex.Message
                     }
-                }
+                },
+                Errors = { errorRecord }
             };
         }
     }
@@ -157,5 +238,68 @@ public sealed class ExecutionService
             Message = message,
             Data = data
         });
+    }
+
+    private static ErrorRecord CreateErrorRecord(
+        ErrorClassification classification,
+        string scope,
+        string stage,
+        string summary)
+    {
+        return new ErrorRecord
+        {
+            ErrorId = Guid.NewGuid().ToString("N"),
+            Classification = classification,
+            Scope = scope,
+            Stage = stage,
+            Summary = summary,
+            OccurredAt = DateTimeOffset.UtcNow
+        };
+    }
+
+    private static async Task<IReadOnlyList<SecretDescriptor>> EnumerateWithRetryAsync(
+        KeyVaultSecretEnumerator enumerator,
+        EnumerationFilter filter,
+        VersionSelection versionSelection,
+        int? pageSize,
+        string? continuationToken,
+        RetryPolicy retryPolicy,
+        CancellationToken cancellationToken)
+    {
+        var attempts = 0;
+        Exception? lastException = null;
+
+        for (var attempt = 1; attempt <= retryPolicy.MaxAttempts; attempt++)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            attempts = attempt;
+
+            try
+            {
+                return await enumerator.EnumerateAsync(
+                    filter,
+                    versionSelection,
+                    pageSize,
+                    continuationToken,
+                    cancellationToken);
+            }
+            catch (Exception ex)
+            {
+                lastException = ex;
+                if (attempt == retryPolicy.MaxAttempts)
+                {
+                    break;
+                }
+
+                var delaySeconds = Math.Min(
+                    retryPolicy.MaxDelaySeconds,
+                    retryPolicy.BaseDelaySeconds * (int)Math.Pow(2, attempt - 1));
+                await Task.Delay(TimeSpan.FromSeconds(delaySeconds), cancellationToken);
+            }
+        }
+
+        throw new InvalidOperationException(
+            $"Enumeration failed after {attempts} attempts.",
+            lastException);
     }
 }

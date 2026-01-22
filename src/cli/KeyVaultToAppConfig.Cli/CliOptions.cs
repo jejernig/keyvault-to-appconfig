@@ -23,4 +23,5 @@ public sealed class CliOptions
     public string? ReportJson { get; set; }
     public string? Verbosity { get; set; }
     public string? CorrelationId { get; set; }
+    public bool FailFast { get; set; }
 }

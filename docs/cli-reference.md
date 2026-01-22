@@ -28,6 +28,16 @@ Provide required and optional CLI arguments with defaults and examples.
 | --report-json | No | (none) | Write report JSON to path. |
 | --verbosity | No | normal | Console output level (minimal, normal, verbose). |
 | --correlation-id | No | (generated) | Correlation identifier for logs and reports. |
+| --fail-fast | No | false | Stop after the first recoverable error. |
+
+## Exit Codes
+
+| Code | Meaning |
+|------|---------|
+| 0 | Success (no errors). |
+| 1 | Recoverable failures (one or more secrets failed, run completed). |
+| 2 | Fatal failure (run stopped due to fatal error). |
+| 3 | Canceled (run stopped by cancellation). |
 
 ## Dry-Run Example
 

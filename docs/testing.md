@@ -47,6 +47,7 @@ Define the required test scope, high-risk paths, and CI gates to protect the too
 **Gate & Waiver Policy**:
 - Integration tests are required for release validation.
 - Waivers require documented approval, scope, and expiry and must be referenced in release notes.
+- Waiver approvals must be recorded by a release approver (release manager or security reviewer) with evidence links.
 
 **Run Instructions**:
 - Use the integration test project in `tests/integration/KeyVaultToAppConfig.IntegrationTests/`
@@ -64,6 +65,11 @@ Define the required test scope, high-risk paths, and CI gates to protect the too
 - Copy-value guardrail tests require explicit confirmation flags.
 - Secret URI resolution tests ensure no raw values are logged.
 - Failure paths do not emit secret material.
+
+## Reproducibility Criteria
+
+- Given the same inputs, test prerequisites, and environment configuration, the required suites and gate outcomes are identical.
+- Approved sources of variability (e.g., service unavailability) must be documented as waiverable exceptions.
 
 ## Unit Coverage to Risk Paths
 

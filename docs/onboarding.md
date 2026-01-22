@@ -75,3 +75,7 @@ dotnet run -- \
 - Dry-run completes with a console summary.
 - Report JSON contains correlationId, totals, and failures if present.
 - Copy-value mode is blocked unless confirmations are supplied.
+
+## Testing Strategy
+
+See `docs/testing.md` for required test scope, CI gates, and risk-path coverage.
